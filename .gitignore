@@ -1,0 +1,2 @@
+# Ignore local Playwright browser binaries; they are large and re-generated.
+legal-etl/.playwright-browsers/
