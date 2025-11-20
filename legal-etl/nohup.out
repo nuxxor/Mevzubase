@@ -1,0 +1,21 @@
+[yargitay] listing since 2023-10-01 (live=True, resume=True)
+[RUN 3e450cfb-29ce-454d-b9a8-fedd2d8e34dc] stage=list shard=yargitay:2023-10-01->2025-10-08 item=YARGITAY:10.HD:2025/15523-2025/12566:26.09.2025 decision_date=26.09.2025
+[RUN 3e450cfb-29ce-454d-b9a8-fedd2d8e34dc] processed=1 quality=ok last_doc=yargitay:10.HD:2025/15523-2025/12566:2025-09-26
+[RUN 3e450cfb-29ce-454d-b9a8-fedd2d8e34dc] stage=list shard=yargitay:2023-10-01->2025-10-08 item=YARGITAY:10.HD:2025/15334-2025/12565:26.09.2025 decision_date=26.09.2025
+[RUN 3e450cfb-29ce-454d-b9a8-fedd2d8e34dc] processed=2 quality=ok last_doc=yargitay:10.HD:2025/15334-2025/12565:2025-09-26
+[RUN 3e450cfb-29ce-454d-b9a8-fedd2d8e34dc] stage=list shard=yargitay:2023-10-01->2025-10-08 item=YARGITAY:10.HD:2025/15222-2025/12564:26.09.2025 decision_date=26.09.2025
+[RUN 3e450cfb-29ce-454d-b9a8-fedd2d8e34dc] processed=3 quality=ok last_doc=yargitay:10.HD:2025/15222-2025/12564:2025-09-26
+[RUN 3e450cfb-29ce-454d-b9a8-fedd2d8e34dc] stage=list shard=yargitay:2023-10-01->2025-10-08 item=YARGITAY:10.HD:2025/15217-2025/12563:26.09.2025 decision_date=26.09.2025
+[RUN 3e450cfb-29ce-454d-b9a8-fedd2d8e34dc] processed=4 quality=ok last_doc=yargitay:10.HD:2025/15217-2025/12563:2025-09-26
+[RUN 3e450cfb-29ce-454d-b9a8-fedd2d8e34dc] stage=list shard=yargitay:2023-10-01->2025-10-08 item=YARGITAY:10.HD:2025/14993-2025/12361:24.09.2025 decision_date=24.09.2025
+[RUN 3e450cfb-29ce-454d-b9a8-fedd2d8e34dc] processed=5 quality=ok last_doc=yargitay:10.HD:2025/14993-2025/12361:2025-09-24
+[RUN 3e450cfb-29ce-454d-b9a8-fedd2d8e34dc] stage=list shard=yargitay:2023-10-01->2025-10-08 item=YARGITAY:10.HD:2025/14915-2025/12364:24.09.2025 decision_date=24.09.2025
+[RUN 3e450cfb-29ce-454d-b9a8-fedd2d8e34dc] processed=6 quality=ok last_doc=yargitay:10.HD:2025/14915-2025/12364:2025-09-24
+[RUN 3e450cfb-29ce-454d-b9a8-fedd2d8e34dc] stage=list shard=yargitay:2023-10-01->2025-10-08 item=YARGITAY:10.HD:2025/14913-2025/12363:24.09.2025 decision_date=24.09.2025
+[RUN 3e450cfb-29ce-454d-b9a8-fedd2d8e34dc] processed=7 quality=ok last_doc=yargitay:10.HD:2025/14913-2025/12363:2025-09-24
+[RUN 3e450cfb-29ce-454d-b9a8-fedd2d8e34dc] stage=list shard=yargitay:2023-10-01->2025-10-08 item=YARGITAY:10.HD:2025/14580-2025/12562:26.09.2025 decision_date=26.09.2025
+[RUN 3e450cfb-29ce-454d-b9a8-fedd2d8e34dc] processed=8 quality=ok last_doc=yargitay:10.HD:2025/14580-2025/12562:2025-09-26
+[RUN 3e450cfb-29ce-454d-b9a8-fedd2d8e34dc] stage=list shard=yargitay:2023-10-01->2025-10-08 item=YARGITAY:10.HD:2025/14543-2025/12561:26.09.2025 decision_date=26.09.2025
+[RUN 3e450cfb-29ce-454d-b9a8-fedd2d8e34dc] processed=9 quality=ok last_doc=yargitay:10.HD:2025/14543-2025/12561:2025-09-26
+[RUN 3e450cfb-29ce-454d-b9a8-fedd2d8e34dc] stage=list shard=yargitay:2023-10-01->2025-10-08 item=YARGITAY:10.HD:2025/14542-2025/12560:26.09.2025 decision_date=26.09.2025
+[RUN 3e450cfb-29ce-454d-b9a8-fedd2d8e34dc] processed=10 quality=ok last_doc=yargitay:10.HD:2025/14542-2025/12560:2025-09-26
