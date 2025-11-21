@@ -1,25 +1,14 @@
 from __future__ import annotations
 
-# Not: Yargıtay sitesinde Detaylı Arama çağrıları JSON döndüren iki endpoint kullanıyor:
-#   - aramadetaylist   => liste (daire, esas/karar no, tarih, doküman id)
-#   - getDokuman       => doküman gövdesi (HTML string) id ile
-# Bu konektör önce bu JSON'ları yakalar, yoksa DOM'dan devam eder. JSON sayesinde liste+detay
-# başka isteğe gerek kalmadan çekilebiliyor ve hızlanıyor.
-
-import json
-import os
 import random
-import re
 import time
 import unicodedata
-from datetime import date, datetime
-from pathlib import Path
+from datetime import date, datetime, timedelta
 from typing import Iterable, List, Optional
 
+import httpx
 import structlog
-from playwright.sync_api import TimeoutError
 from selectolax.parser import HTMLParser, Node
-from urllib.parse import parse_qsl, urlencode
 
 from src.core.chunking import chunk_decision
 from src.core.decision_chunker import chunk_sections, normalize_text, split_sections
@@ -31,104 +20,141 @@ from .base import BaseConnector
 from .playwright_session import PlaywrightSession
 
 
-DATE_FMT_UI = "%d.%m.%Y"
+ISO_WITH_MS = "%Y-%m-%dT%H:%M:%S.000Z"
 
 
-class YargitayConnector(BaseConnector):
-    source = "YARGITAY"
-    # Arama listesi ve doküman XHR yolları
-    LIST_ENDPOINT_HINT = "aramadetaylist"
-    DOC_ENDPOINT_HINT = "getDokuman"
+class Yargitay2Connector(BaseConnector):
+    """
+    Bedesten / Mevzuat JSON tabanlı Yargıtay konektörü.
+
+    List endpoint:
+      POST https://bedesten.adalet.gov.tr/emsal-karar/searchDocuments
+    Detail endpoint (HTML view):
+      GET  https://mevzuat.adalet.gov.tr/ictihat/{id}
+    """
+
+    source = "YARGITAY"  # DocID uyumluluğu için aynı kaynak adı tutuluyor
+    SEARCH_URL = "https://bedesten.adalet.gov.tr/emsal-karar/searchDocuments"
+    DOC_URL = "https://bedesten.adalet.gov.tr/emsal-karar/getDocumentContent"
+    VIEW_URL = "https://mevzuat.adalet.gov.tr/ictihat/{id}"
 
     logger = structlog.get_logger(__name__)
+    MAX_ROWS_PER_WINDOW = 25000
 
     def __init__(
         self,
-        fixture_dir: str | Path | None = None,
-        use_live: bool = False,
-        headless: bool = True,
-        executable_path: str | None = None,
+        page_size: int = 100,
+        item_type_list: Optional[list] = None,
+        use_live: bool = True,
+        headless: bool = True,  # run_connector arayüzü ile uyum için tutuldu
+        timeout: float = 30.0,
+        window_days: int = 7,
+        use_browser_fallback: bool = False,
     ) -> None:
-        self.fixture_dir = Path(
-            fixture_dir or Path(__file__).resolve().parents[2] / "tests/fixtures/sample_html"
-        )
+        self.page_size = page_size
+        self.item_type_list = item_type_list or []
+        self.window_days = window_days
         self.use_live = use_live
         self.headless = headless
-        self.executable_path = executable_path or os.environ.get("PW_CHROMIUM_PATH")
-        self.session = PlaywrightSession(
-            headless=self.headless,
-            executable_path=self.executable_path,
+        self.use_browser_fallback = use_browser_fallback
+        self.client = httpx.Client(
+            http2=True,
+            limits=httpx.Limits(max_connections=50, max_keepalive_connections=20),
+            transport=httpx.HTTPTransport(retries=3),
+            timeout=timeout,
+            headers={
+                "User-Agent": "Mozilla/5.0",
+                "Content-Type": "application/json",
+                "Origin": "https://mevzuat.adalet.gov.tr",
+                "Referer": "https://mevzuat.adalet.gov.tr/",
+                "Accept-Language": "tr-TR,tr;q=0.9",
+                "adaletapplicationname": "UyapMevzuat",
+            },
         )
+        self.session: PlaywrightSession | None = None
+        if self.use_browser_fallback:
+            self.session = PlaywrightSession(headless=self.headless, executable_path=None)
 
     def list_items(self, since: date, until: date | None = None) -> Iterable[ItemRef]:
-        if not self.use_live:
-            yield ItemRef(
-                key=f"{self.source}:3HD:E2024/1083-K2025/1439:2025-03-10",
-                url="https://karararama.yargitay.gov.tr/sample",
-                metadata={"fixture": "yargitay_sample.html"},
-            )
-            return
-        for item in self._list_items_live(since, until):
-            yield item
+        end = until or date.today()
+        cursor = since
+        seen_keys: set[str] = set()
+
+        while cursor <= end:
+            win_start = cursor
+            win_end = min(end, cursor + timedelta(days=self.window_days) - timedelta(days=1))
+            yield from self._list_window(win_start, win_end, seen_keys)
+            cursor = win_end + timedelta(days=1)
 
     def fetch(self, ref: ItemRef) -> RawDoc:
-        if not self.use_live:
-            path = self.fixture_dir / ref.metadata.get("fixture", "yargitay_sample.html")
-            html = path.read_text(encoding="utf-8")
-            return RawDoc(ref=ref, content_html=html)
-        
-        html = self._fetch_detail_live(ref)
+        doc_id = ref.metadata.get("doc_id")
+        url = self.VIEW_URL.format(id=doc_id) if doc_id else ref.url
+        html = ""
+        if doc_id:
+            html = self._fetch_via_api(doc_id)
+        if not html.strip():
+            resp = self._get_with_retry(url)
+            html = resp.text
+        html = _maybe_decode_base64_html(html)
+        if self.use_browser_fallback and _looks_empty(html):
+            try:
+                html = self._fetch_via_browser(url)
+            except Exception as exc:  # noqa: BLE001
+                self.logger.warning("yargitay_browser_fallback_failed", url=url, error=str(exc))
         return RawDoc(ref=ref, content_html=html)
 
     def parse(self, raw: RawDoc) -> CanonDoc:
         tree = HTMLParser(raw.content_html or "")
-        
-        # Metadata
-        chamber = _text_or(tree.css_first(".court")) or raw.ref.metadata.get("chamber", "")
-        e_no = (_text_or(tree.css_first(".e")) or raw.ref.metadata.get("e_no", "")).replace("E.", "").strip()
-        k_no = (_text_or(tree.css_first(".k")) or raw.ref.metadata.get("k_no", "")).replace("K.", "").strip()
-        date_txt = (_text_or(tree.css_first(".t")) or raw.ref.metadata.get("decision_date", "")).replace("T.", "").strip()
-        decision_date, decision_date_text = _parse_decision_date(date_txt)
 
-        title = _text_or(tree.css_first(".title")) or "Karar"
-        
-        summary = _text_or(tree.css_first(".summary"))
-        reasoning_nodes = tree.css(".reasoning p")
-        reasoning = [p.text(separator="\n", strip=True) for p in reasoning_nodes]
+        chamber = raw.ref.metadata.get("chamber", "")
+        e_no = raw.ref.metadata.get("e_no", "")
+        k_no = raw.ref.metadata.get("k_no", "")
+        decision_date_text = raw.ref.metadata.get("decision_date", "")
 
-        processed_text = "\n".join(part for part in [summary, *reasoning] if part.strip())
+        parsed_meta = _extract_meta_fields(tree)
+        chamber = parsed_meta.get("chamber") or chamber
+        e_no = parsed_meta.get("e_no") or e_no
+        k_no = parsed_meta.get("k_no") or k_no
+        decision_date_text = parsed_meta.get("decision_date") or decision_date_text
 
+        decision_date, decision_date_text = _parse_decision_date(decision_date_text)
+
+        title = parsed_meta.get("title") or "Karar"
+        processed_text = _extract_body_text(tree)
         if not processed_text:
-            processed_text = _extract_body(tree)
-
-        if not processed_text and raw.content_html:
-            processed_text = _clean_html_text(raw.content_html)
-
+            processed_text = _clean_html_text(raw.content_html or "")
         processed_text = normalize_text(unicodedata.normalize("NFKC", processed_text))
 
-        junk_indicators = ["recordsTotal", "lengthMenu", "kayıt göster", "DataTable"]
-        if any(ind in processed_text for ind in junk_indicators):
+        if not processed_text.strip():
             processed_text = "Metin alınamadı"
 
         normalized_chamber = normalize_chamber(chamber) or chamber or "unknown"
         quality_flag = "ok"
-        checksum_text = processed_text
         doc_id_date = decision_date or decision_date_text or "unknown"
-        if processed_text in ("", "Metin alınamadı"):
+        checksum_text = processed_text
+        if processed_text == "Metin alınamadı":
             quality_flag = "no_text"
             fallback = "|".join(
-                part
-                for part in [normalized_chamber or chamber, e_no or "", k_no or "", str(doc_id_date)]
-                if part
+                part for part in [normalized_chamber or chamber, e_no or "", k_no or "", str(doc_id_date)] if part
             )
             checksum_text = fallback or "no_text"
 
         checksum = doc_checksum(checksum_text)
-        doc_id = build_decision_doc_id(self.source, normalized_chamber, e_no, k_no, doc_id_date)
-        self._log_case_mismatch(raw.ref.metadata, "e_no", e_no)
-        self._log_case_mismatch(raw.ref.metadata, "k_no", k_no)
-
+        doc_id_base = build_decision_doc_id("YARGITAY", normalized_chamber, e_no, k_no, doc_id_date)
+        if ("unknown" in str(doc_id_base)) or (not e_no) or (not k_no):
+            bed_id = raw.ref.metadata.get("doc_id")
+            if bed_id:
+                doc_id_base = f"yargitay:bedesten:{bed_id}"
+        doc_id = doc_id_base
         legal_topic_tags = infer_topic_tags(processed_text)
+
+        item_type = (raw.ref.metadata.get("item_type") or "").upper()
+        chamber_txt = (raw.ref.metadata.get("chamber") or "").upper()
+        court = "Yargıtay"
+        if "ISTINAF" in item_type or "BAM" in chamber_txt:
+            court = "Bölge Adliye Mahkemesi"
+        elif "GENEL KURUL" in chamber_txt:
+            court = "Yargıtay Genel Kurulu"
 
         return CanonDoc(
             doc_id=doc_id,
@@ -139,7 +165,7 @@ class YargitayConnector(BaseConnector):
             checksum=checksum,
             decision_date=decision_date,
             chamber=normalized_chamber,
-            court="Yargıtay",
+            court=court,
             text=processed_text,
             meta={
                 "e_no": e_no,
@@ -149,7 +175,8 @@ class YargitayConnector(BaseConnector):
                 "chunk_version": 1,
                 "embed_version": 1,
                 "quality_flag": quality_flag,
-                "decision_status": raw.ref.metadata.get("decision_status"),
+                "bedesten_id": raw.ref.metadata.get("doc_id"),
+                "year": (decision_date.isoformat()[:4] if decision_date else (decision_date_text or "")[:4]),
             },
             raw=raw,
         )
@@ -161,358 +188,306 @@ class YargitayConnector(BaseConnector):
         sections = split_sections(text)
         return chunk_sections(doc, sections)
 
-    def _list_items_live(self, since: date, until: date | None = None) -> List[ItemRef]:
-        items: List[ItemRef] = []
-        json_rows: list[dict] = []
-        json_consumed = False
-        seen_keys: set[str] = set()
-        paging_meta: dict = {}
-        page = self.session.new_page()
-
-        def _capture(resp):
-            try:
-                ct = (resp.headers.get("content-type") or "").lower()
-                if "application/json" in ct and self.LIST_ENDPOINT_HINT in resp.url:
-                    data = resp.json()
-                    json_rows.extend(_extract_json_rows(data))
-                    self.session.remember_list_request(resp)
-                    paging_meta["url"] = resp.url
-                    payload = resp.request.post_data or ""
-                    paging_meta["raw_payload"] = payload
-                    if payload.strip().startswith("{"):
-                        try:
-                            paging_meta["json_payload"] = json.loads(payload)
-                        except ValueError:
-                            paging_meta["json_payload"] = None
-                    else:
-                        paging_meta["pairs"] = parse_qsl(payload, keep_blank_values=True)
-                    paging_meta["records_total"] = (
-                        data.get("recordsTotal")
-                        if isinstance(data, dict)
-                        else None
-                    )
-            except Exception:
-                return
-
-        def _consume_json_rows() -> None:
-            nonlocal json_consumed
-            if json_consumed or not json_rows:
-                return
-            json_consumed = True
-            json_rows.extend(_fetch_additional_rows(page, paging_meta))
-            for row in json_rows:
-                item = _item_from_row(row, page.url, self.source)
-                if item and item.key not in seen_keys:
-                    items.append(item)
-                    seen_keys.add(item.key)
-
-        def _is_list_response(resp) -> bool:
-            try:
-                ct = (resp.headers.get("content-type") or "").lower()
-            except Exception:
-                return False
-            return "application/json" in ct and self.LIST_ENDPOINT_HINT in resp.url
-
-        page.on("response", _capture)
+    def close(self) -> None:
         try:
-            page.goto("https://karararama.yargitay.gov.tr/", wait_until="domcontentloaded")
-            self._human_delay()
-            page.get_by_text("DETAYLI ARAMA", exact=False).click()
-            self._human_delay()
-
-            start_val = since.strftime(DATE_FMT_UI)
-            end_target = until or date.today()
-            end_val = end_target.strftime(DATE_FMT_UI)
-
-            _force_input(page, "Başlama tarihini giriniz.", start_val)
-            _force_input(page, "Bitiş tarihini giriniz.", end_val)
-
-            self._human_delay()
-            search_btn = page.get_by_role("button", name=re.compile("Ara", re.I))
-            try:
-                with page.expect_response(_is_list_response, timeout=20000):
-                    search_btn.click()
-            except TimeoutError:
-                search_btn.click()
-
-            page.wait_for_timeout(300)
-            _consume_json_rows()
-            if items:
-                return items
-
-            try:
-                page.wait_for_selector("table tbody tr", timeout=15000)
-            except TimeoutError:
-                _consume_json_rows()
-                if items:
-                    return items
-                if not items:
-                    self.logger.warning("yargitay_list_timeout")
-                return items
-
-            self._set_page_size(page, 100)
-            table = page.locator("table tbody tr")
-
-            while True:
-                page.wait_for_timeout(800)
-                row_count = table.count()
-                if row_count == 0:
-                    break
-
-                for i in range(row_count):
-                    row = table.nth(i)
-                    cells = row.locator("td")
-                    if cells.count() < 5:
-                        continue
-
-                    daire = cells.nth(1).inner_text().strip()
-                    e_no = cells.nth(2).inner_text().strip()
-                    k_no = cells.nth(3).inner_text().strip()
-                    dt = cells.nth(4).inner_text().strip()
-
-                    normalized_chamber = normalize_chamber(daire) or daire
-                    normalized_e_no = normalize_case_number(e_no)
-                    normalized_k_no = normalize_case_number(k_no)
-                    key = f"{self.source}:{normalized_chamber}:{normalized_e_no}-{normalized_k_no}:{dt}"
-                    if key in seen_keys:
-                        continue
-                    seen_keys.add(key)
-                    items.append(
-                        ItemRef(
-                            key=key,
-                            url=page.url,
-                            metadata={
-                                "chamber": normalized_chamber,
-                                "e_no": normalized_e_no,
-                                "k_no": normalized_k_no,
-                                "decision_date": dt,
-                            },
-                        )
-                    )
-
-                next_candidates = page.get_by_role("button", name=re.compile("Sonraki", re.I))
-                if next_candidates.count() == 0:
-                    break
-                next_btn = next_candidates.first
-                if not next_btn.is_visible() or not next_btn.is_enabled():
-                    break
-                with page.expect_response(lambda response: response.status == 200, timeout=10000):
-                    next_btn.click()
-                self._human_delay()
-
-        except Exception as exc:
-                self.logger.warning("yargitay_list_error", error=str(exc))
-        finally:
-            page.close()
-        _consume_json_rows()
-        if items:
-            return items
-        return items
-
-    def _set_page_size(self, page, size: int) -> None:
-        try:
-            page.evaluate(
-                """(size) => {
-                    const selects = Array.from(document.querySelectorAll('select'));
-                    const target = selects.find(sel => sel.outerHTML.includes('length') || sel.innerText.includes('kayıt'));
-                    if (target) {
-                        target.value = String(size);
-                        target.dispatchEvent(new Event('change', { bubbles: true }));
-                    }
-                }""",
-                size,
-            )
+            self.client.close()
         except Exception:
-            return
+            pass
 
-    def _fetch_detail_live(self, ref: ItemRef) -> str:
-        doc_id = ref.metadata.get("doc_id")
-        html_content = self._fetch_via_template(doc_id)
-        if html_content:
-            return html_content
+    def _build_payload(self, start: date, end: date, page: int) -> dict:
+        start_dt = datetime(start.year, start.month, start.day)
+        end_dt = datetime(end.year, end.month, end.day, 23, 59, 59)
+        return {
+            "applicationName": "UyapMevzuat",
+            "paging": True,
+            "data": {
+                "pageSize": self.page_size,
+                "pageNumber": page,
+                "kararTarihiStart": start_dt.strftime(ISO_WITH_MS),
+                "kararTarihiEnd": end_dt.strftime(ISO_WITH_MS),
+                "itemTypeList": self.item_type_list,
+            },
+        }
 
-        resolved_doc_id = self._resolve_doc_id_via_list(ref)
-        if resolved_doc_id:
-            ref.metadata["doc_id"] = resolved_doc_id
-            doc_id = resolved_doc_id
-            html_content = self._fetch_via_template(resolved_doc_id)
-            if html_content:
-                return html_content
-
-        for attempt in range(3):
-            page = self.session.new_page()
-            page.set_default_timeout(60000)
-            doc_payload: list = []
-
-            def _capture(resp):
-                try:
-                    if self.DOC_ENDPOINT_HINT in resp.url:
-                        self.session.remember_doc_request(resp, doc_id)
-                        ct = (resp.headers.get("content-type") or "").lower()
-                        if "application/json" in ct:
-                            doc_payload.append(resp.json())
-                        else:
-                            doc_payload.append(resp.text())
-                    if self.LIST_ENDPOINT_HINT in resp.url:
-                        self.session.remember_list_request(resp)
-                except Exception:
-                    return
-
-            page.on("response", _capture)
-            try:
-                page.goto("https://karararama.yargitay.gov.tr/", wait_until="domcontentloaded")
-                self._human_delay()
-                page.get_by_text("DETAYLI ARAMA", exact=False).click()
-                self._human_delay()
-
-                if ref.metadata.get("decision_date"):
-                    d_date = ref.metadata["decision_date"]
-                    _force_input(page, "Başlama tarihini giriniz.", d_date)
-                    _force_input(page, "Bitiş tarihini giriniz.", d_date)
-
-                if ref.metadata.get("e_no"):
-                    _fill_file_numbers(page, ref.metadata["e_no"], year_ph="Esas yıl", start_idx=0)
-
-                if ref.metadata.get("k_no"):
-                    _fill_file_numbers(page, ref.metadata["k_no"], year_ph="Karar yıl", start_idx=1)
-
-                search_btn = page.get_by_role("button", name=re.compile("Ara", re.I))
-                search_btn.click()
-                try:
-                    page.wait_for_load_state("networkidle", timeout=15000)
-                except Exception:
-                    page.wait_for_timeout(500)
-
-                try:
-                    page.wait_for_selector("table tbody tr", timeout=60000)
-                except TimeoutError:
-                    page.reload(wait_until="domcontentloaded", timeout=30000)
-                    self._human_delay()
-                    page.wait_for_selector("table tbody tr", timeout=30000)
-                row = page.locator("table tbody tr").first
-                try:
-                    row.scroll_into_view_if_needed()
-                    row.click(timeout=7000)
-                except Exception:
-                    row.click(force=True, timeout=7000)
-
-                page.get_by_text("İçtihat Metni", exact=False).wait_for(timeout=20000)
-                page.wait_for_timeout(800)
-
-                if doc_payload:
-                    html_content = _doc_from_payload(doc_payload[0])
-
-                if not html_content.strip():
-                    html_content = _extract_dom_text(page)
-
-                if html_content.strip():
-                    return html_content
-
-            except Exception as exc:
-                self.logger.warning(
-                    "yargitay_detail_error",
-                    error=str(exc),
-                    key=ref.key,
-                    attempt=attempt + 1,
-                )
-                if isinstance(exc, TimeoutError):
-                    resolved_doc_id = self._resolve_doc_id_via_list(ref)
-                    if resolved_doc_id:
-                        ref.metadata["doc_id"] = resolved_doc_id
-                        doc_id = resolved_doc_id
-                        direct_html = self._fetch_via_template(resolved_doc_id)
-                        if direct_html:
-                            return direct_html
-                    # İlk time-out'ta sadece context'i temizle, tekrarı bozma
-                    if attempt == 0:
-                        self.session.reset_context()
-                    else:
-                        # Üst üste time-out'larda tarayıcıyı da tazele
-                        self.session.reset_context(restart_browser=True)
-            finally:
-                try:
-                    page.close()
-                except Exception:
-                    pass
-
-            delay = (1.5 ** attempt) + random.uniform(0.3, 0.8)
-            time.sleep(delay)
-
-        return self._fetch_via_template(doc_id) or ""
-
-    def _resolve_doc_id_via_list(self, ref: ItemRef) -> str | None:
-        rows = self.session.fetch_list_rows(
-            chamber=ref.metadata.get("chamber"),
-            e_no=ref.metadata.get("e_no"),
-            k_no=ref.metadata.get("k_no"),
-            decision_date=ref.metadata.get("decision_date"),
-        )
-        if not rows:
-            return None
-        list_url = self.session.list_url or ref.url
-        target_e = normalize_case_number(ref.metadata.get("e_no", ""))
-        target_k = normalize_case_number(ref.metadata.get("k_no", ""))
-        target_dt = ref.metadata.get("decision_date")
-
+    def _emit_items(self, rows: List[dict], seen_keys: set[str]) -> Iterable[ItemRef]:
         for row in rows:
-            item = _item_from_row(row, list_url, self.source)
+            item = _item_from_row(row, self.source, self.VIEW_URL)
             if not item:
                 continue
-            doc_id = item.metadata.get("doc_id")
-            if not doc_id:
+            if item.key in seen_keys:
                 continue
-            if target_e and normalize_case_number(item.metadata.get("e_no", "")) != target_e:
-                continue
-            if target_k and normalize_case_number(item.metadata.get("k_no", "")) != target_k:
-                continue
-            if target_dt and item.metadata.get("decision_date") != target_dt:
-                continue
-            return doc_id
-        return None
+            seen_keys.add(item.key)
+            yield item
 
-    def _fetch_via_template(self, doc_id: str | None) -> str:
-        response = self.session.fetch_document(doc_id)
-        if not response:
-            return ""
-        ct = (response.headers.get("content-type") or "").lower()
+    def _list_window(self, win_start: date, win_end: date, seen_keys: set[str]) -> Iterable[ItemRef]:
+        payload = self._build_payload(win_start, win_end, page=1)
         try:
-            if "application/json" in ct:
-                return _doc_from_payload(response.json())
-            return response.text()
-        except Exception:
-            return ""
-
-    def _log_case_mismatch(self, metadata: dict | None, field: str, parsed_value: str | None) -> None:
-        if not metadata:
-            return
-        expected = metadata.get(field)
-        if not expected or not parsed_value:
-            return
-        if normalize_case_number(expected) != normalize_case_number(parsed_value):
+            resp = self._post_with_retry(payload)
+            blob = resp.json()
+        except Exception as exc:  # noqa: BLE001
             self.logger.warning(
-                "yargitay_meta_mismatch",
-                field=field,
-                expected=expected,
-                parsed=parsed_value,
+                "yargitay_list_error",
+                window_start=win_start.isoformat(),
+                window_end=win_end.isoformat(),
+                error=str(exc),
             )
+            return []
 
-    def _human_delay(self, min_ms: int = 300, max_ms: int = 1200) -> None:
-        time.sleep(random.uniform(min_ms, max_ms) / 1000)
+        rows, total = _extract_rows_and_total(blob)
+        # Çok büyük pencereyi otomatik böl
+        if total and total > self.MAX_ROWS_PER_WINDOW and (win_end - win_start).days > 1:
+            mid = win_start + (win_end - win_start) // 2
+            if mid > win_start:
+                yield from self._list_window(win_start, mid, seen_keys)
+                yield from self._list_window(mid + timedelta(days=1), win_end, seen_keys)
+                return
+        # Total var ama hiç satır yoksa logla ve gerekirse böl/bitir
+        if total and not rows:
+            if win_end <= win_start:
+                self.logger.warning(
+                    "yargitay_empty_rows",
+                    window_start=win_start.isoformat(),
+                    window_end=win_end.isoformat(),
+                    expected=total,
+                )
+                return
+            mid = win_start + (win_end - win_start) // 2
+            yield from self._list_window(win_start, mid, seen_keys)
+            yield from self._list_window(mid + timedelta(days=1), win_end, seen_keys)
+            return
+        # Total var ama hiç satır yoksa doğrudan böl
+        fetched = 0
+        for item in self._emit_items(rows, seen_keys):
+            fetched += 1
+            yield item
+
+        page = 1
+        while rows and (total is None or fetched < total):
+            page += 1
+            payload = self._build_payload(win_start, win_end, page=page)
+            try:
+                resp = self._post_with_retry(payload)
+                blob = resp.json()
+            except Exception as exc:  # noqa: BLE001
+                self.logger.warning(
+                    "yargitay_list_page_error",
+                    page=page,
+                    window_start=win_start.isoformat(),
+                    window_end=win_end.isoformat(),
+                    error=str(exc),
+                )
+                break
+            rows, total_next = _extract_rows_and_total(blob)
+            if total is None and total_next is not None:
+                total = total_next
+            if not rows:
+                break
+            for row_item in self._emit_items(rows, seen_keys):
+                fetched += 1
+                yield row_item
+            if total is None and len(rows) < self.page_size:
+                break
+
+        if total and fetched < total:
+            self.logger.warning(
+                "yargitay_missing_rows",
+                window_start=win_start.isoformat(),
+                window_end=win_end.isoformat(),
+                expected=total,
+                fetched=fetched,
+            )
+            if (win_end - win_start).days >= 1:
+                mid = win_start + (win_end - win_start) // 2
+                yield from self._list_window(win_start, mid, seen_keys)
+                yield from self._list_window(mid + timedelta(days=1), win_end, seen_keys)
+
+    def _post_with_retry(self, payload: dict, attempts: int = 3) -> httpx.Response:
+        for attempt in range(attempts):
+            try:
+                resp = self.client.post(self.SEARCH_URL, json=payload)
+                if resp.status_code == 429:
+                    ra = resp.headers.get("Retry-After")
+                    if ra:
+                        try:
+                            time.sleep(float(ra))
+                        except Exception:
+                            pass
+                    raise httpx.HTTPStatusError(
+                        f"status {resp.status_code}", request=resp.request, response=resp
+                    )
+                if resp.status_code >= 500:
+                    raise httpx.HTTPStatusError(
+                        f"status {resp.status_code}", request=resp.request, response=resp
+                    )
+                return resp
+            except Exception:
+                if attempt == attempts - 1:
+                    raise
+                delay = (1.5 ** attempt) + random.uniform(0.2, 0.6)
+                time.sleep(delay)
+
+    def _get_with_retry(self, url: str, attempts: int = 3) -> httpx.Response:
+        for attempt in range(attempts):
+            try:
+                resp = self.client.get(url)
+                if resp.status_code == 429:
+                    ra = resp.headers.get("Retry-After")
+                    if ra:
+                        try:
+                            time.sleep(float(ra))
+                        except Exception:
+                            pass
+                    raise httpx.HTTPStatusError(
+                        f"status {resp.status_code}", request=resp.request, response=resp
+                    )
+                if resp.status_code >= 500:
+                    raise httpx.HTTPStatusError(
+                        f"status {resp.status_code}", request=resp.request, response=resp
+                    )
+                return resp
+            except Exception:
+                if attempt == attempts - 1:
+                    raise
+                delay = (1.5 ** attempt) + random.uniform(0.2, 0.6)
+                time.sleep(delay)
+
+    def _fetch_via_api(self, doc_id: str) -> str:
+        payload = {"data": {"documentId": str(doc_id)}, "applicationName": "UyapMevzuat"}
+        try:
+            resp = self.client.post(self.DOC_URL, json=payload)
+            if not resp.is_success:
+                self.logger.warning("api_error", status=resp.status_code, doc_id=doc_id)
+                return ""
+            try:
+                data = resp.json()
+                html = _doc_from_payload(data)
+            except Exception:
+                html = resp.text
+            if html and len(html.strip()) > 50:
+                return html
+        except Exception as exc:  # noqa: BLE001
+            self.logger.warning("api_fetch_exception", error=str(exc), doc_id=doc_id)
+        return ""
+
+    def _fetch_via_browser(self, url: str) -> str:
+        if not self.session:
+            raise RuntimeError("browser fallback session is not available")
+        page = self.session.new_page()
+        page.set_default_timeout(60000)
+        try:
+            page.goto(url, wait_until="domcontentloaded")
+            page.wait_for_timeout(1200)
+            container = page.locator(
+                ".card-scroll, .content, article, .decision-text, .panel-body, .tab-content, #printArea"
+            ).first
+            if container.count():
+                return container.inner_text()
+            printable = page.locator("xpath=//div[contains(@class,'card') and .//text()]").first
+            if printable.count():
+                return printable.inner_text()
+            return page.content()
+        finally:
+            try:
+                page.close()
+            except Exception:
+                pass
 
     def close(self) -> None:
-        if hasattr(self, "session"):
-            self.session.close()
+        try:
+            self.client.close()
+        except Exception:
+            pass
+        try:
+            if self.session:
+                self.session.close()
+        except Exception:
+            pass
 
 
-def _text_or(node: Optional[Node]) -> str:
-    return node.text(strip=True) if node else ""
+def _looks_empty(html: str, threshold: int = 80) -> bool:
+    if not html or len(html) < threshold:
+        return True
+    try:
+        tree = HTMLParser(html)
+        text = (
+            tree.body.text(separator="\n", strip=True)
+            if tree.body
+            else tree.text(separator="\n", strip=True)
+        )
+        return len(text.strip()) < threshold
+    except Exception:
+        return False
 
 
-def _normalize_date(dt: str) -> str:
-    parts = dt.split(".")
-    if len(parts) != 3:
-        return dt
-    return f"{parts[2]}-{parts[1]}-{parts[0]}"
+# Backward compatibility: keep the old class name expected by scripts/run_connector.py
+class YargitayConnector(Yargitay2Connector):
+    pass
+
+
+def _item_from_row(row: dict, source: str, view_url: str) -> ItemRef | None:
+    chamber = _pick(row, ["birimAdi", "daireAdi", "daire", "daireadi", "daireAd", "kurum"])
+    e_no = _pick(row, ["esasNo", "esas", "esasno", "esasNumarasi"])
+    if not e_no:
+        e_no = _compose_case(row.get("esasNoYil"), row.get("esasNoSira"))
+    k_no = _pick(row, ["kararNo", "karar", "kararno", "kararNumarasi"])
+    if not k_no:
+        k_no = _compose_case(row.get("kararNoYil"), row.get("kararNoSira"))
+    dt = _pick(row, ["kararTarihiStr", "kararTarihi", "tarih", "decisionDate"])
+    doc_id = _pick(row, ["documentId", "id", "docId", "dokumanId", "dokumanID"])
+
+    if not any([chamber, e_no, k_no, dt, doc_id]):
+        return None
+
+    normalized_chamber = normalize_chamber(chamber) or chamber
+    normalized_e_no = normalize_case_number(e_no)
+    normalized_k_no = normalize_case_number(k_no)
+    key = f"{source}:{normalized_chamber}:{normalized_e_no}-{normalized_k_no}:{dt or doc_id or 'unknown'}"
+
+    url = view_url.format(id=doc_id) if doc_id else Yargitay2Connector.SEARCH_URL
+    metadata = {
+        "chamber": normalized_chamber,
+        "e_no": normalized_e_no,
+        "k_no": normalized_k_no,
+        "decision_date": dt,
+        "doc_id": doc_id,
+    }
+    if row.get("birimId"):
+        metadata["birim_id"] = row.get("birimId")
+    item_type = row.get("itemType")
+    if isinstance(item_type, dict):
+        metadata["item_type"] = item_type.get("name") or item_type.get("description")
+
+    return ItemRef(key=key, url=url, metadata=metadata)
+
+
+def _extract_rows_and_total(blob: dict) -> tuple[list[dict], Optional[int]]:
+    rows: list[dict] = []
+    total = None
+    if not isinstance(blob, dict):
+        return rows, total
+    data = blob.get("data")
+    if isinstance(data, dict):
+        if isinstance(data.get("emsalKararList"), list):
+            rows = [r for r in data.get("emsalKararList", []) if isinstance(r, dict)]
+        elif isinstance(data.get("data"), list):
+            rows = [r for r in data.get("data", []) if isinstance(r, dict)]
+        elif isinstance(data.get("results"), list):
+            rows = [r for r in data.get("results", []) if isinstance(r, dict)]
+        total = (
+            data.get("recordsTotal")
+            or data.get("totalElements")
+            or data.get("total")
+            or data.get("totalCount")
+            or data.get("recordCount")
+        )
+    elif isinstance(data, list):
+        rows = [r for r in data if isinstance(r, dict)]
+        total = blob.get("recordsTotal") or blob.get("totalElements") or blob.get("total") or blob.get("totalCount")
+    if isinstance(total, str) and total.isdigit():
+        total = int(total)
+    if total is not None and not isinstance(total, int):
+        total = None
+    return rows, total
 
 
 def _parse_decision_date(value: str) -> tuple[date | None, str | None]:
@@ -520,7 +495,13 @@ def _parse_decision_date(value: str) -> tuple[date | None, str | None]:
     if not cleaned:
         return None, None
 
-    for fmt in ("%d.%m.%Y", "%Y-%m-%d"):
+    iso_candidate = cleaned.rstrip("Z")
+    try:
+        return datetime.fromisoformat(iso_candidate).date(), None
+    except ValueError:
+        pass
+
+    for fmt in ("%Y-%m-%d", "%d.%m.%Y"):
         try:
             return datetime.strptime(cleaned, fmt).date(), None
         except ValueError:
@@ -529,30 +510,38 @@ def _parse_decision_date(value: str) -> tuple[date | None, str | None]:
     return None, cleaned
 
 
-def _extract_body(tree: HTMLParser) -> str:
-    # Önce "İçtihat Metni" çevresini dene
-    anchor = None
-    for tag in tree.css("h1, h2, h3, h4, h5, b, strong, span, p, div"):
-        if "İçtihat Metni" in tag.text(strip=True):
-            anchor = tag
-            break
+def _extract_meta_fields(tree: HTMLParser) -> dict:
+    meta = {"title": None, "chamber": None, "e_no": None, "k_no": None, "decision_date": None}
+    try:
+        h = tree.css_first("h1, h2, .title")
+        if h:
+            meta["title"] = h.text(strip=True)
 
-    if anchor:
-        current = anchor
-        for _ in range(5):
-            text_content = current.text(separator="\n", strip=True)
-            if len(text_content) > 200:
-                lines = [ln.strip() for ln in text_content.splitlines() if ln.strip()]
-                return "\n".join(lines)
-            if current.parent is None:
-                break
-            current = current.parent
+        labels = tree.css("b, strong, label, .label")
+        for lb in labels or []:
+            text = (lb.text(strip=True) or "").upper()
+            val = lb.next.text(strip=True) if isinstance(lb.next, Node) else ""
+            if "DAİRE" in text:
+                meta["chamber"] = val
+            elif "ESAS" in text:
+                meta["e_no"] = val
+            elif "KARAR" in text and "NO" in text:
+                meta["k_no"] = val
+            elif "KARAR TARİH" in text or "TARİH" in text:
+                meta["decision_date"] = val
+    except Exception:
+        return meta
+    return meta
 
-    # Son çare: paragraf uzunluğuna göre seç
-    paras = [p.text(separator="\n", strip=True) for p in tree.css("p") if len(p.text(strip=True)) > 40]
-    if paras:
-        return "\n".join(paras)
-    return ""
+
+def _extract_body_text(tree: HTMLParser) -> str:
+    try:
+        container = tree.css_first(".card-scroll, .content, article, .decision-text, .panel-body, .tab-content, #printArea")
+        if container:
+            return container.text(separator="\n", strip=True)
+        return tree.body.text(separator="\n", strip=True) if tree.body else ""
+    except Exception:
+        return ""
 
 
 def _clean_html_text(html: str) -> str:
@@ -560,252 +549,94 @@ def _clean_html_text(html: str) -> str:
         parser = HTMLParser(html or "")
         for tag in parser.css("script, style, link, meta"):
             tag.remove()
-        container = parser.css_first(".card-scroll") or parser.body or parser
-        return container.text(separator="\n", strip=True)
+        root = parser.body or parser
+        return root.text(separator="\n", strip=True)
     except Exception:
         return html or ""
 
 
-def _extract_dom_text(page) -> str:
-    try:
-        container = page.locator(".card-scroll").first
-        if container.count():
-            return container.inner_text()
-        printable = page.locator("xpath=//div[contains(@class,'card') and .//text()[contains(.,'Metni')]]").first
-        if printable.count():
-            return printable.inner_text()
-        return page.content()
-    except Exception:
-        return ""
-
-
-def _update_payload_pairs(pairs: list[tuple[str, str]], start: int, draw: int, length: int | None) -> str:
-    updated: list[tuple[str, str]] = []
-    for key, value in pairs:
-        if key == "start":
-            updated.append((key, str(start)))
-        elif key == "draw":
-            updated.append((key, str(draw)))
-        elif length is not None and key == "length":
-            updated.append((key, str(length)))
-        else:
-            updated.append((key, value))
-    return urlencode(updated, doseq=True)
-
-
-def _fetch_additional_rows(page, meta: dict) -> list[dict]:
-    url = meta.get("url")
-    if not url:
-        return []
-    json_payload = meta.get("json_payload")
-    if json_payload:
-        return _fetch_additional_rows_json(page, url, json_payload)
-    pairs = meta.get("pairs")
-    if not pairs:
-        return []
-    length = None
-    draw = 1
-    for key, value in pairs:
-        if key == "length":
-            try:
-                length = int(value)
-            except ValueError:
-                length = None
-        elif key == "draw":
-            try:
-                draw = int(value)
-            except ValueError:
-                draw = 1
-    if length is None or length <= 0:
-        length = 100
-    records_total = meta.get("records_total") or 0
-    start = length
-    rows: list[dict] = []
-    while True:
-        if records_total and start >= records_total:
-            break
-        payload = _update_payload_pairs(pairs, start, draw + 1, length)
-        try:
-            resp = page.context.request.fetch(
-                url,
-                method="POST",
-                headers={
-                    "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
-                    "x-requested-with": "XMLHttpRequest",
-                    "referer": "https://karararama.yargitay.gov.tr/",
-                },
-                data=payload,
-                timeout=20000,
-            )
-        except Exception:
-            break
-        if not resp.ok:
-            break
-        data = resp.json()
-        new_rows = _extract_json_rows(data)
-        if not new_rows:
-            break
-        rows.extend(new_rows)
-        records_total = data.get("recordsTotal") or records_total
-        start += len(new_rows)
-        draw += 1
-        if len(new_rows) < length:
-            break
-    return rows
-
-
-def _fetch_additional_rows_json(page, url: str, template: dict) -> list[dict]:
-    try:
-        payload = json.loads(json.dumps(template))
-    except Exception:
-        return []
-    data_obj = payload.get("data")
-    if not isinstance(data_obj, dict):
-        return []
-    page_size = data_obj.get("pageSize") or 100
-    page_number = data_obj.get("pageNumber") or 1
-    rows: list[dict] = []
-    while True:
-        page_number += 1
-        data_obj["pageNumber"] = page_number
-        try:
-            resp = page.context.request.fetch(
-                url,
-                method="POST",
-                headers={
-                    "content-type": "application/json; charset=UTF-8",
-                    "x-requested-with": "XMLHttpRequest",
-                    "referer": "https://karararama.yargitay.gov.tr/",
-                },
-                data=json.dumps(payload),
-                timeout=20000,
-            )
-        except Exception:
-            break
-        if not resp.ok:
-            break
-        data = resp.json()
-        new_rows = _extract_json_rows(data)
-        if not new_rows:
-            break
-        rows.extend(new_rows)
-        if len(new_rows) < page_size:
-            break
-    return rows
-
-
-
-
-def _force_input(page, placeholder: str | re.Pattern, value: str) -> None:
-    loc = page.get_by_placeholder(placeholder)
-    if not loc.count():
-        return
-    _force_input_loc(loc.first, value)
-
-
-def _force_input_loc(locator, value: str) -> None:
-    try:
-        locator.evaluate(
-            f"""
-            (el) => {{
-                el.removeAttribute('readonly');
-                el.value = '{value}';
-                el.dispatchEvent(new Event('input', {{ bubbles: true }}));
-                el.dispatchEvent(new Event('change', {{ bubbles: true }}));
-            }}
-            """
-        )
-    except Exception:
-        try:
-            locator.fill(value)
-        except Exception:
-            pass
-
-
-def _fill_file_numbers(page, number_str: str, year_ph: str, start_idx: int) -> None:
-    year_match = re.search(r"(\d{4})", number_str or "")
-    seq_match = re.search(r"/(\d+)", number_str or "")
-
-    if year_match:
-        _force_input(page, year_ph, year_match.group(1))
-
-    if seq_match:
-        seq_val = seq_match.group(1)
-        first_inputs = page.get_by_placeholder("İlk sıra no")
-        last_inputs = page.get_by_placeholder("Son sıra no")
-        if first_inputs.count() > start_idx:
-            _force_input_loc(first_inputs.nth(start_idx), seq_val)
-        if last_inputs.count() > start_idx:
-            _force_input_loc(last_inputs.nth(start_idx), seq_val)
-
-
-def _extract_json_rows(data) -> list[dict]:
-    rows: list[dict] = []
-    try:
-        if isinstance(data, list):
-            for el in data:
-                if isinstance(el, dict):
-                    rows.append(el)
-        elif isinstance(data, dict):
-            for key in ("data", "results", "rows"):
-                if isinstance(data.get(key), list):
-                    rows.extend([el for el in data[key] if isinstance(el, dict)])
-            # Bazı yanıtlar data içinde "data": {...} şeklinde olabilir
-            inner = data.get("data")
-            if isinstance(inner, dict):
-                for key in ("data", "rows", "results"):
-                    if isinstance(inner.get(key), list):
-                        rows.extend([el for el in inner[key] if isinstance(el, dict)])
-    except Exception:
-        pass
-    return rows
-
-
 def _pick(row: dict, keys: list[str]) -> str:
-    for k in keys:
-        if k in row and row[k]:
-            return str(row[k]).strip()
+    for key in keys:
+        if key in row and row[key]:
+            return str(row[key]).strip()
     return ""
 
 
-def _item_from_row(row: dict, url: str, source: str) -> ItemRef | None:
-    daire = _pick(row, ["daire", "daireAdi", "daireadi", "daireAd", "daire_ad"])
-    e_no = _pick(row, ["esas", "esasNo", "esasno", "esasNoStr", "esas_numarasi", "esasNumarasi"])
-    k_no = _pick(row, ["karar", "kararNo", "kararno", "kararNoStr", "karar_numarasi", "kararNumarasi"])
-    dt = _pick(row, ["kararTarihi", "tarih", "kararTarih", "kararTarihiStr", "kararTarihStr", "decisionDate"])
-    doc_id = _pick(row, ["id", "dokumanId", "dokumanID", "docId", "documentId", "kararId"])
-
-    if not any([daire, e_no, k_no, dt]):
-        return None
-
-    normalized_chamber = normalize_chamber(daire) or daire
-    normalized_e_no = normalize_case_number(e_no)
-    normalized_k_no = normalize_case_number(k_no)
-    key = f"{source}:{normalized_chamber}:{normalized_e_no}-{normalized_k_no}:{dt}"
-    meta = {
-        "chamber": normalized_chamber,
-        "e_no": normalized_e_no,
-        "k_no": normalized_k_no,
-        "decision_date": dt,
-    }
-    if doc_id:
-        meta["doc_id"] = doc_id
-    return ItemRef(key=key, url=url, metadata=meta)
+def _compose_case(year_val, seq_val) -> str:
+    if year_val is None or seq_val is None:
+        return ""
+    try:
+        return f"{int(year_val)}/{int(seq_val)}"
+    except Exception:
+        return f"{year_val}/{seq_val}"
 
 
 def _doc_from_payload(payload) -> str:
     if payload is None:
         return ""
-    # Eğer dict ise data/icerik alanlarını ara
-    if isinstance(payload, dict):
-        data = payload.get("data", payload)
-        if isinstance(data, dict):
-            for key in ("icerik", "content", "html", "dokuman", "data"):
-                val = data.get(key)
-                if isinstance(val, str):
-                    return val
-        if isinstance(data, str):
-            return data
+
     if isinstance(payload, str):
-        return payload
+        return _maybe_decode_base64_html(payload)
+
+    if isinstance(payload, dict):
+        data_content = payload.get("data")
+        if isinstance(data_content, dict):
+            for key in ("data", "icerik", "content", "html", "belgeIcerik"):
+                val = data_content.get(key)
+                if isinstance(val, str) and val:
+                    return _maybe_decode_base64_html(val)
+        elif isinstance(data_content, str):
+            return _maybe_decode_base64_html(data_content)
+
+        for key in ("icerik", "content", "html", "dokuman"):
+            val = payload.get(key)
+            if isinstance(val, str):
+                return _maybe_decode_base64_html(val)
+
     return ""
+
+
+def _looks_empty(html: str, threshold: int = 80) -> bool:
+    if not html or len(html) < threshold:
+        return True
+    try:
+        tree = HTMLParser(html)
+        text = (
+            tree.body.text(separator="\n", strip=True)
+            if tree.body
+            else tree.text(separator="\n", strip=True)
+        )
+        return len(text.strip()) < threshold
+    except Exception:
+        return False
+
+
+def _maybe_decode_base64_html(html: str) -> str:
+    """Base64 ile kodlanmış olabilecek HTML'i çözer."""
+    if not html:
+        return html
+
+    stripped = html.strip()
+    # Çok kısa veya zaten HTML etiketi içeriyorsa dokunma
+    if len(stripped) < 20 or ("<html" in stripped.lower() and ">" in stripped):
+        return html
+
+    # Base64 karakter seti kontrolü
+    if not all(c.isalnum() or c in "+/=\n\r" or c.isspace() for c in stripped):
+        return html
+
+    try:
+        import base64
+
+        missing_padding = len(stripped) % 4
+        if missing_padding:
+            stripped += "=" * (4 - missing_padding)
+        decoded_bytes = base64.b64decode(stripped, validate=True)
+        decoded_txt = decoded_bytes.decode("utf-8", errors="ignore")
+        keywords = ["<html", "<body", "<meta", "mahkeme", "karar", "dava", "esas no", "t.c."]
+        if any(k in decoded_txt.lower() for k in keywords):
+            return decoded_txt
+    except Exception:
+        return html
+
+    return html

@@ -56,10 +56,22 @@ def main() -> None:
     parser.add_argument("--log-heartbeat", action="store_true", help="Print heartbeat/log lines regularly.")
     parser.add_argument("--max-attempts", type=int, default=5, help="Retry limit per item before marking failed.")
     parser.add_argument("--full-text", action="store_true", help="Print full decision text for each doc (noisy).")
+    parser.add_argument(
+        "--browser-fallback",
+        action="store_true",
+        help="Use Playwright fallback for detail pages (slower; Yargitay only).",
+    )
     args = parser.parse_args()
 
     connector_cls = CONNECTORS[args.connector]
-    connector = connector_cls(use_live=args.live, headless=not args.show_browser)
+    if args.connector == "yargitay":
+        connector = connector_cls(
+            use_live=args.live,
+            headless=not args.show_browser,
+            use_browser_fallback=args.browser_fallback,
+        )
+    else:
+        connector = connector_cls(use_live=args.live, headless=not args.show_browser)
 
     store = StateStore(args.state_db)
     store.mark_stale_runs(args.connector, stale_after=args.stale_after)
