@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import itertools
+import os
 import random
 import time
 import unicodedata
 from datetime import date, datetime, timedelta
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, Tuple
 
 import httpx
 import structlog
@@ -57,20 +59,23 @@ class Yargitay2Connector(BaseConnector):
         self.use_live = use_live
         self.headless = headless
         self.use_browser_fallback = use_browser_fallback
-        self.client = httpx.Client(
-            http2=True,
-            limits=httpx.Limits(max_connections=50, max_keepalive_connections=20),
-            transport=httpx.HTTPTransport(retries=3),
-            timeout=timeout,
-            headers={
-                "User-Agent": "Mozilla/5.0",
-                "Content-Type": "application/json",
-                "Origin": "https://mevzuat.adalet.gov.tr",
-                "Referer": "https://mevzuat.adalet.gov.tr/",
-                "Accept-Language": "tr-TR,tr;q=0.9",
-                "adaletapplicationname": "UyapMevzuat",
-            },
-        )
+        self.base_headers = {
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Accept-Encoding": "gzip, deflate, br",
+            "X-Requested-With": "XMLHttpRequest",
+            "Origin": "https://mevzuat.adalet.gov.tr",
+            "Referer": "https://mevzuat.adalet.gov.tr/",
+            "Accept-Language": "tr-TR,tr;q=0.9",
+            "adaletapplicationname": "UyapMevzuat",
+            "Connection": "keep-alive",
+            "Cache-Control": "no-cache",
+        }
+        self.timeout = timeout
+        self.proxy_pool = _load_proxies_from_env()
+        self._proxy_cycle = itertools.cycle(self.proxy_pool) if self.proxy_pool else None
+        self.client = self._make_client()
         self.session: PlaywrightSession | None = None
         if self.use_browser_fallback:
             self.session = PlaywrightSession(headless=self.headless, executable_path=None)
@@ -194,6 +199,15 @@ class Yargitay2Connector(BaseConnector):
         except Exception:
             pass
 
+    def _make_client(self, proxy: str | None = None) -> httpx.Client:
+        return httpx.Client(
+            http2=False,
+            limits=httpx.Limits(max_connections=8, max_keepalive_connections=4),
+            timeout=self.timeout,
+            headers=self.base_headers,
+            proxies=proxy or None,
+        )
+
     def _build_payload(self, start: date, end: date, page: int) -> dict:
         start_dt = datetime(start.year, start.month, start.day)
         end_dt = datetime(end.year, end.month, end.day, 23, 59, 59)
@@ -206,23 +220,31 @@ class Yargitay2Connector(BaseConnector):
                 "kararTarihiStart": start_dt.strftime(ISO_WITH_MS),
                 "kararTarihiEnd": end_dt.strftime(ISO_WITH_MS),
                 "itemTypeList": self.item_type_list,
+                "orderByList": [
+                    {"field": "kararTarihi", "order": "ASC"},
+                    {"field": "documentId", "order": "ASC"},
+                ],
             },
         }
 
-    def _emit_items(self, rows: List[dict], seen_keys: set[str]) -> Iterable[ItemRef]:
+    def _emit_items(self, rows: List[dict], seen_keys: set[str], window_seen: set[str]) -> Iterable[ItemRef]:
         for row in rows:
             item = _item_from_row(row, self.source, self.VIEW_URL)
             if not item:
                 continue
+            window_seen.add(item.key)
             if item.key in seen_keys:
                 continue
             seen_keys.add(item.key)
             yield item
 
     def _list_window(self, win_start: date, win_end: date, seen_keys: set[str]) -> Iterable[ItemRef]:
-        payload = self._build_payload(win_start, win_end, page=1)
+        proxy = next(self._proxy_cycle) if self._proxy_cycle else None
+        client = self._make_client(proxy)
+        window_seen: set[str] = set()
         try:
-            resp = self._post_with_retry(payload)
+            payload = self._build_payload(win_start, win_end, page=1)
+            resp = self._post_with_retry(payload, client)
             blob = resp.json()
         except Exception as exc:  # noqa: BLE001
             self.logger.warning(
@@ -231,16 +253,31 @@ class Yargitay2Connector(BaseConnector):
                 window_end=win_end.isoformat(),
                 error=str(exc),
             )
+            client.close()
             return []
 
         rows, total = _extract_rows_and_total(blob)
-        # Çok büyük pencereyi otomatik böl
+        # Boş geldi ama total varsa 0-index dene
+        if total and not rows:
+            alt_payload = self._build_payload(win_start, win_end, page=0)
+            try:
+                alt_resp = self._post_with_retry(alt_payload, client)
+                alt_blob = alt_resp.json()
+                alt_rows, alt_total = _extract_rows_and_total(alt_blob)
+                if alt_rows:
+                    rows = alt_rows
+                    total = total or alt_total
+            except Exception:
+                pass
+
         if total and total > self.MAX_ROWS_PER_WINDOW and (win_end - win_start).days > 1:
             mid = win_start + (win_end - win_start) // 2
             if mid > win_start:
                 yield from self._list_window(win_start, mid, seen_keys)
                 yield from self._list_window(mid + timedelta(days=1), win_end, seen_keys)
+                client.close()
                 return
+
         # Total var ama hiç satır yoksa logla ve gerekirse böl/bitir
         if total and not rows:
             if win_end <= win_start:
@@ -250,14 +287,16 @@ class Yargitay2Connector(BaseConnector):
                     window_end=win_end.isoformat(),
                     expected=total,
                 )
+                client.close()
                 return
             mid = win_start + (win_end - win_start) // 2
             yield from self._list_window(win_start, mid, seen_keys)
             yield from self._list_window(mid + timedelta(days=1), win_end, seen_keys)
+            client.close()
             return
-        # Total var ama hiç satır yoksa doğrudan böl
+
         fetched = 0
-        for item in self._emit_items(rows, seen_keys):
+        for item in self._emit_items(rows, seen_keys, window_seen):
             fetched += 1
             yield item
 
@@ -266,7 +305,7 @@ class Yargitay2Connector(BaseConnector):
             page += 1
             payload = self._build_payload(win_start, win_end, page=page)
             try:
-                resp = self._post_with_retry(payload)
+                resp = self._post_with_retry(payload, client)
                 blob = resp.json()
             except Exception as exc:  # noqa: BLE001
                 self.logger.warning(
@@ -282,29 +321,33 @@ class Yargitay2Connector(BaseConnector):
                 total = total_next
             if not rows:
                 break
-            for row_item in self._emit_items(rows, seen_keys):
+            for row_item in self._emit_items(rows, seen_keys, window_seen):
                 fetched += 1
                 yield row_item
             if total is None and len(rows) < self.page_size:
                 break
 
-        if total and fetched < total:
+        observed = len(window_seen)
+        if total and observed < total:
             self.logger.warning(
                 "yargitay_missing_rows",
                 window_start=win_start.isoformat(),
                 window_end=win_end.isoformat(),
                 expected=total,
-                fetched=fetched,
+                fetched=observed,
             )
             if (win_end - win_start).days >= 1:
                 mid = win_start + (win_end - win_start) // 2
                 yield from self._list_window(win_start, mid, seen_keys)
                 yield from self._list_window(mid + timedelta(days=1), win_end, seen_keys)
 
-    def _post_with_retry(self, payload: dict, attempts: int = 3) -> httpx.Response:
+        client.close()
+
+    def _post_with_retry(self, payload: dict, client: httpx.Client | None = None, attempts: int = 3) -> httpx.Response:
         for attempt in range(attempts):
             try:
-                resp = self.client.post(self.SEARCH_URL, json=payload)
+                cli = client or self.client
+                resp = cli.post(self.SEARCH_URL, json=payload)
                 if resp.status_code == 429:
                     ra = resp.headers.get("Retry-After")
                     if ra:
@@ -542,6 +585,23 @@ def _extract_body_text(tree: HTMLParser) -> str:
         return tree.body.text(separator="\n", strip=True) if tree.body else ""
     except Exception:
         return ""
+
+
+def _load_proxies_from_env() -> list[str]:
+    raw = os.environ.get("YARGITAY_PROXIES", "")
+    if not raw.strip():
+        return []
+    proxies: list[str] = []
+    for entry in raw.replace("\n", ",").split(","):
+        entry = entry.strip()
+        if not entry:
+            continue
+        if "://" not in entry:
+            proxies.append(f"http://{entry}")
+        else:
+            proxies.append(entry)
+    random.shuffle(proxies)
+    return proxies
 
 
 def _clean_html_text(html: str) -> str:

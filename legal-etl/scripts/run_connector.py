@@ -52,6 +52,7 @@ def main() -> None:
     parser.add_argument("--stale-after", type=int, default=180, help="Seconds before marking run as stalled.")
     parser.add_argument("--window-start", type=str, help="Override window start date (YYYY-MM-DD).")
     parser.add_argument("--window-end", type=str, help="Override window end date (YYYY-MM-DD).")
+    parser.add_argument("--window-days", type=int, default=None, help="Override window size in days (Yargitay).")
     parser.add_argument("--show-browser", action="store_true", help="Disable headless mode to observe the browser.")
     parser.add_argument("--log-heartbeat", action="store_true", help="Print heartbeat/log lines regularly.")
     parser.add_argument("--max-attempts", type=int, default=5, help="Retry limit per item before marking failed.")
@@ -65,11 +66,14 @@ def main() -> None:
 
     connector_cls = CONNECTORS[args.connector]
     if args.connector == "yargitay":
-        connector = connector_cls(
-            use_live=args.live,
-            headless=not args.show_browser,
-            use_browser_fallback=args.browser_fallback,
-        )
+        connector_kwargs: dict[str, object] = {
+            "use_live": args.live,
+            "headless": not args.show_browser,
+            "use_browser_fallback": args.browser_fallback,
+        }
+        if args.window_days:
+            connector_kwargs["window_days"] = args.window_days
+        connector = connector_cls(**connector_kwargs)
     else:
         connector = connector_cls(use_live=args.live, headless=not args.show_browser)
 
