@@ -1,0 +1,16 @@
+# Proxy listesi (URL formatı: http://kullanici:sifre@host:port)
+http://taygundogan:poineer107@isp2.livaproxy.com:30111
+http://taygundogan:poineer107@isp2.livaproxy.com:31116
+http://taygundogan:poineer107@isp2.livaproxy.com:31235
+http://taygundogan:poineer107@isp2.livaproxy.com:31144
+http://taygundogan:poineer107@isp2.livaproxy.com:30085
+
+# Kullanım
+# 1) Export et (virgülle birleştirip env değişkeni YARGITAY_PROXIES'ne koy):
+#    export YARGITAY_PROXIES=\"$(paste -sd, proxylist.txt)\"
+# 2) Run'ı başlat (örnek):
+#    cd legal-etl
+#    poetry run python scripts/run_connector.py \\
+#      --connector yargitay --live --resume \\
+#      --state-db state_2008.db --window-start 2008-01-01 --window-end 2008-12-31 --log-heartbeat
+# 3) Başka yıllar için state-db ve window değerlerini değiştir.
