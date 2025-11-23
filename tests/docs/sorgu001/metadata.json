@@ -1,0 +1,17 @@
+{
+  "mode": "llm_pipeline",
+  "question": "Nitelikli yağma suçundan yargılanan bir kişi mağduru yağma olayından önce hırsızlıktan şikayet ederse fakat şikayet takipsizlikle sonuçlanırsa somut olaya yine de TCK 150/1 uygulanabilir mi?",
+  "keywords": [
+    "nitelikli yağma suçundan yargılanan",
+    "TCK 150/1",
+    "takipsizlik"
+  ],
+  "query": "nitelikli yağma suçundan yargılanan AND TCK 150/1 AND takipsizlik",
+  "result_summary": "86 sonuc: sayfalama ve yil/daire filtresi onerilir.",
+  "limit": 100,
+  "years_back": 15,
+  "llm_provider": "ollama",
+  "docs_file": "tests\\docs\\sorgu001\\docs.txt",
+  "analysis_file": "tests\\docs\\sorgu001\\analysis.txt",
+  "timestamp": "2025-11-22T22:09:23"
+}

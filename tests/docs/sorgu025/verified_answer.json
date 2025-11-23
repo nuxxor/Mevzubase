@@ -1,0 +1,57 @@
+{
+  "verdict": "uygulanamaz",
+  "reasoning": [
+    {
+      "text": "Kira sözleşmesinde artış şartı yoksa, kiraya veren kira artışı yapamaz.",
+      "supporting_cases": [
+        "627526500"
+      ]
+    },
+    {
+      "text": "Kiraya verenin yaptığı zam, yasal sınırlar içinde olmalıdır.",
+      "supporting_cases": [
+        "1158146300",
+        "620912200",
+        "359378100"
+      ]
+    },
+    {
+      "text": "Sözleşmede belirlenen artış oranı aşılmamalıdır.",
+      "supporting_cases": [
+        "388363600"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "627526500",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 18.01.2012, 2011/16845 E., 2012/1001 K.",
+      "key_role": "Kira sözleşmesinde artış şartı yoksa, kiraya veren kira artışı yapamaz.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/627526500?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22s%C3%B6zle%C5%9Fme%22"
+    },
+    {
+      "id": "1158146300",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 11.06.2025, 2024/2256 E., 2025/3260 K.",
+      "key_role": "Kiraya verenin yaptığı zam, yasal sınırlar içinde olmalıdır.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/1158146300?query=%2B%22s%C3%B6zle%C5%9Fme%22"
+    },
+    {
+      "id": "620912200",
+      "citation": "Yargıtay İstanbul Bölge Adliye Mahkemesi 14. Hukuk Dairesi, 17.12.2020, 2020/938 E., 2020/1428 K.",
+      "key_role": "Kiraya verenin yaptığı zam, yasal sınırlar içinde olmalıdır.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/620912200?query=%2B%22s%C3%B6zle%C5%9Fme%22"
+    },
+    {
+      "id": "359378100",
+      "citation": "Yargıtay 11. Hukuk Dairesi, 04.05.2017, 2016/8614 E., 2017/2654 K.",
+      "key_role": "Kiraya verenin yaptığı zam, yasal sınırlar içinde olmalıdır.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/359378100?query=%2B%22s%C3%B6zle%C5%9Fme%22"
+    },
+    {
+      "id": "388363600",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 06.12.2017, 2017/6950 E., 2017/17136 K.",
+      "key_role": "Sözleşmede belirlenen artış oranı aşılmamalıdır.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/388363600?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22s%C3%B6zle%C5%9Fme%22"
+    }
+  ]
+}

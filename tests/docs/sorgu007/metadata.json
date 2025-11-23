@@ -1,0 +1,45 @@
+{
+  "timestamp": "2025-11-23T01:57:21.224432",
+  "query_hash": "e57f59e7793901d625529ee59a8f4779",
+  "mode": "llm_pipeline",
+  "question": "Nitelikli yağma suçundan yargılanan bir kişi mağduru yağma olayından önce hırsızlıktan şikayet ederse fakat şikayet takipsizlikle sonuçlanırsa somut olaya yine de TCK 150/1 uygulanabilir mi?",
+  "keywords": [
+    "TCK 150/1",
+    "Nitelikli yağma"
+  ],
+  "query": "+\"TCK 150/1\" +\"Nitelikli yağma\"",
+  "result_summary": "50 sonuç: sayfalama ve yıl/daire filtresi önerilir.",
+  "limit": 100,
+  "years_back": 15,
+  "llm_provider": "ollama",
+  "llm_model": "qwen2.5:32b-instruct",
+  "analysis_duration_sec": 15.32,
+  "docs_file": "tests\\docs\\sorgu007\\docs.txt",
+  "analysis_file": "tests\\docs\\sorgu007\\analysis.txt",
+  "sources": [
+    "yargitay",
+    "istinaf"
+  ],
+  "source_counts": {
+    "Yargıtay": 50,
+    "Bölge Adliye Mahkemesi (İstinaf)": 0
+  },
+  "verification": {
+    "verified": true,
+    "errors": [],
+    "warning": "Analizde karar referansı bulunamadı"
+  },
+  "keyword_optimization": {
+    "initial_keywords": [
+      "Nitelikli yağma",
+      "takipsizlik",
+      "TCK 150/1"
+    ],
+    "final_keywords": [
+      "TCK 150/1",
+      "Nitelikli yağma"
+    ],
+    "iterations": 2,
+    "optimization_success": true
+  }
+}

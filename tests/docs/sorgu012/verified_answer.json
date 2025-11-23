@@ -1,0 +1,30 @@
+{
+  "verdict": "uygulanabilir",
+  "reasoning": [
+    {
+      "text": "TCK 150/1 uygulanabilmesi için hukuki ilişkiye dayanan gerçek bir alacak bulunmalıdır. Bu durum, sanığın eylemlerinin hukuki alacağı tahsil amacıyla yapıldığı ve bu alacaksızlık hukuki bir ilişkiye dayandığı zaman sağlanır.",
+      "supporting_cases": [
+        "753909800",
+        "657677400",
+        "753779200"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "753909800",
+      "citation": "Yargıtay 6. Ceza Dairesi, 21.04.2022, 2021/25637 E., 2022/6134 K.",
+      "key_role": "TCK 150/1 uygulanma şartları"
+    },
+    {
+      "id": "657677400",
+      "citation": "Yargıtay 6. Ceza Dairesi, 16.03.2021, 2020/1170 E., 2021/4974 K.",
+      "key_role": "TCK 150/1 uygulanma şartları"
+    },
+    {
+      "id": "753779200",
+      "citation": "Yargıtay 6. Ceza Dairesi, 21.04.2022, 2021/25399 E., 2022/6121 K.",
+      "key_role": "TCK 150/1 uygulanma şartları"
+    }
+  ]
+}

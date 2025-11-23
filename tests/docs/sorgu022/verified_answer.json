@@ -1,0 +1,37 @@
+{
+  "verdict": "uygulanabilir",
+  "reasoning": [
+    {
+      "text": "Hakaret nedeniyle manevi tazminat davası açılabilir. Şahit olmaması, tazminat davası açılmasına engel değildir.",
+      "supporting_cases": [
+        "451363800",
+        "804342600",
+        "1174122000"
+      ]
+    },
+    {
+      "text": "Hakaretin varlığı, şahit bulunmaması durumunda da tazminat davası açılmasına engel teşkil etmemektedir.",
+      "supporting_cases": [
+        "260609200",
+        "1009779600"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "451363800",
+      "citation": "Yargıtay 4. Hukuk Dairesi, 22.10.2018, 2016/8673 E., 2018/6433 K.",
+      "key_role": "Hakaret nedeniyle manevi tazminat davası açılabileceği belirtilmiştir."
+    },
+    {
+      "id": "804342600",
+      "citation": "Yargıtay 19. Hukuk Dairesi, 16.05.2012, 2012/6378 E., 2012/8070 K.",
+      "key_role": "Mahkeme, hakaretin varlığı durumunda manevi tazminat talep edilebileceğini belirtmiştir."
+    },
+    {
+      "id": "1174122000",
+      "citation": "Yargıtay Antalya Bölge Adliye Mahkemesi 14. Hukuk Dairesi, 15.10.2025, 2025/654 E., 2025/729 K.",
+      "key_role": "Hakaretin varlığı, şahit olmaksızın da tazminat davası açılmasına olanak tanır."
+    }
+  ]
+}

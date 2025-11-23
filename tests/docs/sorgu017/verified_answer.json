@@ -1,0 +1,24 @@
+{
+  "verdict": "uygulanabilir",
+  "reasoning": [
+    {
+      "text": "TCK 150/1 uygulanabilmesi için hukuki ilişkiye dayanan gerçek bir alacak bulunmalıdır. Hakaret suçu işlemesi ve bu suçla ilgili mahkumiyet kararı verilmesi, maddi tazminat talebinin temelini oluşturabilir.",
+      "supporting_cases": [
+        "872399200",
+        "932434700"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "872399200",
+      "citation": "Yargıtay Ceza Genel Kurulu, 02.11.2022, 2020/210 E., 2022/686 K.",
+      "key_role": "TCK 150/1 uygulanma şartları"
+    },
+    {
+      "id": "932434700",
+      "citation": "Yargıtay 2. Ceza Dairesi, 26.11.2013, 2012/3970 E., 2013/27714 K.",
+      "key_role": "TCK 150/1 uygulanma şartları"
+    }
+  ]
+}

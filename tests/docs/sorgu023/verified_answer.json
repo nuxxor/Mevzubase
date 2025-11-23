@@ -1,0 +1,48 @@
+{
+  "verdict": "uygulanamaz",
+  "reasoning": [
+    {
+      "text": "Yüzde 100 zam yapmak yasal değildir.",
+      "supporting_cases": [
+        "1172749400",
+        "1147162800",
+        "1007857300"
+      ]
+    },
+    {
+      "text": "Kira artış oranı yasal sınırlar içinde olmalıdır.",
+      "supporting_cases": [
+        "1147162800",
+        "1007857300"
+      ]
+    },
+    {
+      "text": "Sözleşmede kira artış şartı yoksa, kiraya veren artış yapamaz.",
+      "supporting_cases": [
+        "627526500"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "1172749400",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 10.09.2025, 2025/572 E., 2025/3948 K.",
+      "key_role": "Yüzde 100 zam yapmak yasal değildir."
+    },
+    {
+      "id": "1147162800",
+      "citation": "Yargıtay İstanbul Bölge Adliye Mahkemesi 12. Hukuk Dairesi, 22.05.2025, 2022/2193 E., 2025/823 K.",
+      "key_role": "Kira artış oranı yasal sınırlar içinde olmalıdır."
+    },
+    {
+      "id": "1007857300",
+      "citation": "Yargıtay Konya Bölge Adliye Mahkemesi 4. Hukuk Dairesi, 29.02.2024, 2024/1010 E., 2024/904 K.",
+      "key_role": "Kiraya verenin %100 zam yapması yasal değildir."
+    },
+    {
+      "id": "627526500",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 18.01.2012, 2011/16845 E., 2012/1001 K.",
+      "key_role": "Sözleşmede kira artış şartı yoksa, kiraya veren artış yapamaz."
+    }
+  ]
+}

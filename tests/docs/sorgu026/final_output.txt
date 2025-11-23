@@ -1,0 +1,40 @@
+======================================================================
+SONUÇ
+======================================================================
+Soru: Bir dükkan kiraladım 3 yıl önce sözleşme yapmıştık (1 yıllık, her sene yeni sözleşme yapıyoruz) bu s...
+
+Somut olayda mevcut kararlara göre sorudaki hukuki sonuç olumsuz görünmektedir.
+
+======================================================================
+GEREKÇE
+======================================================================
+1. Kira sözleşmesinde artış şartı yoksa, kiraya veren kira artışı yapamaz.
+   Dayanak: 627526500
+
+2. Kiraya verenin %100 zam yapması, sözleşme hükümlerine aykırıdır.
+   Dayanak: 388363600
+
+3. Kira artış oranı, sözleşmede belirlenen oranlara göre yapılmalıdır.
+   Dayanak: 97313600
+
+======================================================================
+DAYANAK KARARLAR
+======================================================================
+• Yargıtay 3. Hukuk Dairesi, 18.01.2012, 2011/16845 E., 2012/1001 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/627526500?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22s%C3%B6zle%C5%9Fme%22
+  Rolü: Kira sözleşmesinde artış şartı yoksa, kiraya veren kira artışı yapamaz.
+
+• Yargıtay 3. Hukuk Dairesi, 06.12.2017, 2017/6950 E., 2017/17136 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/388363600?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22s%C3%B6zle%C5%9Fme%22
+  Rolü: Kiraya verenin %100 zam yapması, sözleşme hükümlerine aykırıdır.
+
+• Yargıtay 6. Hukuk Dairesi, 08.05.2014, 2014/4257 E., 2014/5925 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/97313600?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22s%C3%B6zle%C5%9Fme%22
+  Rolü: Kira artış oranı, sözleşmede belirlenen oranlara göre yapılmalıdır.
+
+======================================================================
+NOTLAR / SINIRLAR
+======================================================================
+Bu soruya en yakın görülen kararlar esas alınmıştır.
+Somut olayın tüm detaylarına göre değerlendirme yapılması önerilir.
+======================================================================

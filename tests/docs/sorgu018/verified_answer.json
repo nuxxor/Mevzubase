@@ -1,0 +1,18 @@
+{
+  "verdict": "belirsiz",
+  "reasoning": [
+    {
+      "text": "Kararda yıllık %90 oranında bir kira artışının doğrudan değerlendirilmediği görülmekte, ancak genel olarak kira artışlarının nasıl belirleneceği hakkında bilgi verilmektedir. Kira artışları üretici fiyat endeksindeki artış oranı ve emsal kira bedelleri göz önünde bulundurularak belirlenmelidir.",
+      "supporting_cases": [
+        "484273400"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "484273400",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 22.01.2019, 2017/7428 E., 2019/396 K.",
+      "key_role": "Kira artışlarının genel belirlenme yöntemini açıklar"
+    }
+  ]
+}

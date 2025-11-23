@@ -1,0 +1,10 @@
+{
+  "verdict": "belirsiz",
+  "reasoning": [
+    {
+      "text": "Verilen karar özetlerinde soruya tam olarak cevap veren spesifik bir durum bulunmamaktadır.",
+      "supporting_cases": []
+    }
+  ],
+  "cases_used": []
+}

@@ -1,0 +1,37 @@
+======================================================================
+SONUÇ
+======================================================================
+Soru: Bir dükkan kiraladım 3 yıl önce sözleşme yapmıştık (1 yıllık, her sene yeni sözleşme yapıyoruz) bu s...
+
+Somut olayda mevcut kararlara göre sorudaki hukuki sonuç olumsuz görünmektedir.
+
+======================================================================
+GEREKÇE
+======================================================================
+1. Kiraya verenin %100 zam yapması yasal değildir.
+   Dayanak: 318225000
+
+2. Kira artış oranı, sözleşmede belirlenen sınırlamalara uygun olmalıdır.
+   Dayanak: 546889200, 467708800
+
+======================================================================
+DAYANAK KARARLAR
+======================================================================
+• Yargıtay 3. Hukuk Dairesi, 15.02.2017, 2017/1490 E., 2017/1430 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/318225000?query=%2B%22kira%20art%C4%B1%C5%9F%22%20%2B%22TBK%20344%22
+  Rolü: Kiraya verenin %100 zam yapması yasal değildir.
+
+• Yargıtay 3. Hukuk Dairesi, 15.10.2019, 2019/1914 E., 2019/7955 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/546889200?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22TBK%20344%22
+  Rolü: Kira bedelinin artış oranı, hâkim tarafından belirlenir.
+
+• Yargıtay 3. Hukuk Dairesi, 17.12.2018, 2017/4927 E., 2018/12855 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/467708800?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22TBK%20344%22
+  Rolü: Kira artış oranı TEFE TÜFE oranında belirlenmiştir.
+
+======================================================================
+NOTLAR / SINIRLAR
+======================================================================
+Bu soruya en yakın görülen kararlar esas alınmıştır.
+Somut olayın tüm detaylarına göre değerlendirme yapılması önerilir.
+======================================================================

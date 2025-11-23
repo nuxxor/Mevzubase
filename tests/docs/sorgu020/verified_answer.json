@@ -1,0 +1,40 @@
+{
+  "verdict": "uygulanamaz",
+  "reasoning": [
+    {
+      "text": "Kiraya verenin her yıl zam yapma hakkı vardır, ancak zam oranı ile ilgili yasal bir sınır belirtilmemiştir.",
+      "supporting_cases": [
+        "1059965000",
+        "1060765000"
+      ]
+    },
+    {
+      "text": "Yüzde 100 zam yapmak yasal değildir ve kiraya verenin zam yapma hakkı, sözleşme şartlarına bağlıdır.",
+      "supporting_cases": [
+        "1054643400",
+        "1060004000"
+      ]
+    },
+    {
+      "text": "Kira artışları, yasal sınırlar içinde olmalıdır ve sözleşmede artış şartı yoksa, kiraya verenin tek taraflı zam yapma hakkı yoktur.",
+      "supporting_cases": []
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "1059965000",
+      "citation": "Yargıtay 6. Hukuk Dairesi, 13.12.2011, 2011/10169 E., 2011/14431 K.",
+      "key_role": "Kiraya verenin zam yapma yetkisi ile ilgili net bir bilgi verilmemiştir."
+    },
+    {
+      "id": "1060004000",
+      "citation": "Yargıtay 6. Hukuk Dairesi, 14.07.2011, 2011/2740 E., 2011/8139 K.",
+      "key_role": "Yüzde 100 zam, yasal olarak kabul edilemez."
+    },
+    {
+      "id": "1054643400",
+      "citation": "Yargıtay 6. Hukuk Dairesi, 21.02.2012, 2011/14413 E., 2012/2552 K.",
+      "key_role": "Sözleşme gereği her yıl yeni bir sözleşme yapılması, kiraya verenin her yıl zam yapma hakkını sınırlamaktadır."
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+======================================================================
+SONUÇ
+======================================================================
+Soru: Bir dükkan kiraladım 3 yıl önce sözleşme yapmıştık (1 yıllık, her sene yeni sözleşme yapıyoruz) bu s...
+
+Somut olayda mevcut kararlara göre sorudaki hukuki sonuç olumsuz görünmektedir.
+
+======================================================================
+GEREKÇE
+======================================================================
+1. Kira artış oranı sözleşmede belirtilmemiştir ve taraflar arasında bu konuda çekişme bulunmaktadır.
+   Dayanak: 1059965000
+
+2. Sözleşmede kira artış şartı yoksa, kiraya verenin tek taraflı artış yapma hakkı yoktur.
+   Dayanak: 627526500
+
+======================================================================
+DAYANAK KARARLAR
+======================================================================
+• Yargıtay 6. Hukuk Dairesi, 13.12.2011, 2011/10169 E., 2011/14431 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/1059965000?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22
+  Rolü: Kira artış oranı sözleşmede belirtilmemiştir.
+
+• Yargıtay 3. Hukuk Dairesi, 18.01.2012, 2011/16845 E., 2012/1001 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/627526500?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22
+  Rolü: Sözleşmede kira artış şartı yoksa, kiraya verenin tek taraflı artış yapma hakkı yoktur.
+
+======================================================================
+NOTLAR / SINIRLAR
+======================================================================
+Bu soruya en yakın görülen kararlar esas alınmıştır.
+Somut olayın tüm detaylarına göre değerlendirme yapılması önerilir.
+======================================================================

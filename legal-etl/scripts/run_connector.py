@@ -62,6 +62,12 @@ def main() -> None:
         action="store_true",
         help="Use Playwright fallback for detail pages (slower; Yargitay only).",
     )
+    parser.add_argument(
+        "--dump-ndjson",
+        type=str,
+        default=None,
+        help="Kararları NDJSON satırı olarak bu dosyaya append et (doc_id, meta, text).",
+    )
     args = parser.parse_args()
 
     connector_cls = CONNECTORS[args.connector]
@@ -120,6 +126,12 @@ def main() -> None:
     consecutive_errors = 0
     processed = 0
 
+    dump_fp = None
+    if args.dump_ndjson:
+        dump_path = Path(args.dump_ndjson)
+        dump_path.parent.mkdir(parents=True, exist_ok=True)
+        dump_fp = dump_path.open("a", encoding="utf-8")
+
     try:
         refs = list(connector.list_items(since, window_end))
         store.enqueue_items(
@@ -165,6 +177,20 @@ def main() -> None:
                 store.mark_queue_done(queue_id)
                 consecutive_errors = 0
 
+                if dump_fp:
+                    payload = {
+                        "doc_id": doc.doc_id,
+                        "title": str(doc.title),
+                        "url": str(doc.url),
+                        "decision_date": (doc.decision_date.isoformat() if doc.decision_date else None),
+                        "chamber": doc.chamber,
+                        "court": doc.court,
+                        "meta": json.loads(json.dumps(doc.meta, default=str)),
+                        "text": doc.text,
+                    }
+                    dump_fp.write(json.dumps(payload, ensure_ascii=False, default=str) + "\n")
+                    dump_fp.flush()
+
                 if args.log_heartbeat:
                     print(
                         f"[RUN {run_id}] processed={processed} quality={doc.meta.get('quality_flag','ok')} last_doc={doc.doc_id}"
@@ -207,6 +233,8 @@ def main() -> None:
         store.finish_run(run_id, status="failed")
         raise
     finally:
+        if dump_fp:
+            dump_fp.close()
         connector.close()
 
 

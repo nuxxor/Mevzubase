@@ -1,2 +1,31 @@
 # Ignore local Playwright browser binaries; they are large and re-generated.
 legal-etl/.playwright-browsers/
+
+# Ignore large site-packages artifacts
+base/Lib/site-packages/pygments/lexers/
+base/Lib/site-packages/pygments/lexers/__pycache__/
+base/Lib/site-packages/mypy/typeshed/stdlib/
+base/Lib/site-packages/torch/
+
+# Ignore mypy package artifacts
+base/Lib/site-packages/mypy/
+# Local virtualenv and caches
+base/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Local env files
+.env
+.env.*
+
+# Local sqlite/state artifacts
+legal-etl/state_*.db
+legal-etl/state_*.db-shm
+legal-etl/state_*.db-wal
+legal-etl/state_*.db-*
+
+# Logs and runtime noise
+*.log

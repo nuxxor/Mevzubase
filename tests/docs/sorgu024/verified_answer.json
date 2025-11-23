@@ -1,0 +1,31 @@
+{
+  "verdict": "uygulanamaz",
+  "reasoning": [
+    {
+      "text": "Kira artış oranı sözleşmede belirtilmemiştir ve taraflar arasında bu konuda çekişme bulunmaktadır.",
+      "supporting_cases": [
+        "1059965000"
+      ]
+    },
+    {
+      "text": "Sözleşmede kira artış şartı yoksa, kiraya verenin tek taraflı artış yapma hakkı yoktur.",
+      "supporting_cases": [
+        "627526500"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "1059965000",
+      "citation": "Yargıtay 6. Hukuk Dairesi, 13.12.2011, 2011/10169 E., 2011/14431 K.",
+      "key_role": "Kira artış oranı sözleşmede belirtilmemiştir.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/1059965000?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22"
+    },
+    {
+      "id": "627526500",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 18.01.2012, 2011/16845 E., 2012/1001 K.",
+      "key_role": "Sözleşmede kira artış şartı yoksa, kiraya verenin tek taraflı artış yapma hakkı yoktur.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/627526500?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22"
+    }
+  ]
+}

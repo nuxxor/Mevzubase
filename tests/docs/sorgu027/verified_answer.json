@@ -1,0 +1,35 @@
+{
+  "verdict": "belirsiz",
+  "reasoning": [
+    {
+      "text": "Kira artış oranı sözleşmede belirlenmemişse, artış talebi geçersizdir.",
+      "supporting_cases": [
+        "159287400"
+      ]
+    },
+    {
+      "text": "Kira artış oranı, Türk Borçlar Kanunu'na göre belirli sınırlamalara tabidir ve bu durumda %100 zam yasal değildir.",
+      "supporting_cases": []
+    },
+    {
+      "text": "Kira bedelinin ne kadar artırılabileceği konusunda kesin bir bilgi verilmemiştir.",
+      "supporting_cases": [
+        "318225000"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "159287400",
+      "citation": "Yargıtay 6. Hukuk Dairesi, 18.01.2016, 2015/11442 E., 2016/37 K.",
+      "key_role": "Kira sözleşmesinde artış hükmü yoksa, artış talebi geçersizdir.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/159287400?query=%2B%22kira%20art%C4%B1%C5%9F%22%20%2B%22TBK%20344%22"
+    },
+    {
+      "id": "318225000",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 15.02.2017, 2017/1490 E., 2017/1430 K.",
+      "key_role": "Kira bedelinin ne kadar artırılabileceği konusunda kesin bir bilgi verilmemiştir.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/318225000?query=%2B%22kira%20art%C4%B1%C5%9F%22%20%2B%22TBK%20344%22"
+    }
+  ]
+}

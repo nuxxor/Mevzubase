@@ -1,0 +1,10 @@
+{
+  "verdict": "belirsiz",
+  "reasoning": [
+    {
+      "text": "LLM yanıtı parse edilemedi.",
+      "supporting_cases": []
+    }
+  ],
+  "cases_used": []
+}

@@ -1,0 +1,48 @@
+======================================================================
+SONUÇ
+======================================================================
+Soru: Bir dükkan kiraladım 3 yıl önce sözleşme yapmıştık (1 yıllık, her sene yeni sözleşme yapıyoruz) bu s...
+
+Somut olayda mevcut kararlara göre sorudaki hukuki sonuç olumsuz görünmektedir.
+
+======================================================================
+GEREKÇE
+======================================================================
+1. Kira sözleşmesinde artış şartı yoksa, kiraya veren kira artışı yapamaz.
+   Dayanak: 627526500
+
+2. Kiraya verenin yaptığı zam, yasal sınırlar içinde olmalıdır.
+   Dayanak: 1158146300, 620912200, 359378100
+
+3. Sözleşmede belirlenen artış oranı aşılmamalıdır.
+   Dayanak: 388363600
+
+======================================================================
+DAYANAK KARARLAR
+======================================================================
+• Yargıtay 3. Hukuk Dairesi, 18.01.2012, 2011/16845 E., 2012/1001 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/627526500?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22s%C3%B6zle%C5%9Fme%22
+  Rolü: Kira sözleşmesinde artış şartı yoksa, kiraya veren kira artışı yapamaz.
+
+• Yargıtay 3. Hukuk Dairesi, 11.06.2025, 2024/2256 E., 2025/3260 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/1158146300?query=%2B%22s%C3%B6zle%C5%9Fme%22
+  Rolü: Kiraya verenin yaptığı zam, yasal sınırlar içinde olmalıdır.
+
+• Yargıtay İstanbul Bölge Adliye Mahkemesi 14. Hukuk Dairesi, 17.12.2020, 2020/938 E., 2020/1428 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/620912200?query=%2B%22s%C3%B6zle%C5%9Fme%22
+  Rolü: Kiraya verenin yaptığı zam, yasal sınırlar içinde olmalıdır.
+
+• Yargıtay 11. Hukuk Dairesi, 04.05.2017, 2016/8614 E., 2017/2654 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/359378100?query=%2B%22s%C3%B6zle%C5%9Fme%22
+  Rolü: Kiraya verenin yaptığı zam, yasal sınırlar içinde olmalıdır.
+
+• Yargıtay 3. Hukuk Dairesi, 06.12.2017, 2017/6950 E., 2017/17136 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/388363600?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22s%C3%B6zle%C5%9Fme%22
+  Rolü: Sözleşmede belirlenen artış oranı aşılmamalıdır.
+
+======================================================================
+NOTLAR / SINIRLAR
+======================================================================
+Bu soruya en yakın görülen kararlar esas alınmıştır.
+Somut olayın tüm detaylarına göre değerlendirme yapılması önerilir.
+======================================================================

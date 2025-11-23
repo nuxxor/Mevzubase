@@ -1,0 +1,37 @@
+======================================================================
+SONUÇ
+======================================================================
+Soru: Bir dükkan kiraladım 3 yıl önce sözleşme yapmıştık (1 yıllık, her sene yeni sözleşme yapıyoruz) bu s...
+
+Somut olayda mevcut kararlara göre sorudaki hukuki sonuç belirsiz görünmektedir.
+
+======================================================================
+GEREKÇE
+======================================================================
+1. Kira artış oranı sözleşmede belirlenmemişse, artış talebi geçersizdir.
+   Dayanak: 159287400
+
+2. Kira artış oranı, Türk Borçlar Kanunu'na göre belirli sınırlamalara tabidir ve bu durumda %100 zam yasal değildir.
+   Dayanak: [Kaynak belirtilmemiş]
+
+3. Kira bedelinin ne kadar artırılabileceği konusunda kesin bir bilgi verilmemiştir.
+   Dayanak: 318225000
+
+======================================================================
+DAYANAK KARARLAR
+======================================================================
+• Yargıtay 6. Hukuk Dairesi, 18.01.2016, 2015/11442 E., 2016/37 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/159287400?query=%2B%22kira%20art%C4%B1%C5%9F%22%20%2B%22TBK%20344%22
+  Rolü: Kira sözleşmesinde artış hükmü yoksa, artış talebi geçersizdir.
+
+• Yargıtay 3. Hukuk Dairesi, 15.02.2017, 2017/1490 E., 2017/1430 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/318225000?query=%2B%22kira%20art%C4%B1%C5%9F%22%20%2B%22TBK%20344%22
+  Rolü: Kira bedelinin ne kadar artırılabileceği konusunda kesin bir bilgi verilmemiştir.
+
+======================================================================
+NOTLAR / SINIRLAR
+======================================================================
+Bu soruya bire bir uyan içtihat bulunmamaktadır.
+Yukarıdaki kararlar ilgili konular bakımından en yakın emsal niteliğindedir.
+Somut olayın tüm detaylarına göre değerlendirme yapılması önerilir.
+======================================================================

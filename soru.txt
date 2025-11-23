@@ -1,0 +1,1129 @@
+Aşağıda hem problemi “neden böyle oluyor” kısmıyla çerçeveledim, hem de koduna %20–30+ performans/kalite artışı getirecek, uygulanabilir bir yol haritası ve somut kod önerileri verdim. Son bölümde ise, istediğin gibi Türkçe ve “kopyala‑yapıştır” kullanıma hazır müthiş detaylı bir ChatGPT promptu ekledim.
+
+1) Neden Yargıtay/İstinaf kararları bu kadar belirleyici?
+
+Türk hukuku kıta Avrupası sistemindedir; kanun “asıl” kaynaktır, emsal (içtihat) kural olarak bağlayıcı değildir. Uygulamada ise Yargıtay içtihatları öngörülebilirlik ve bozma riskinin yönetimi nedeniyle fiilen belirleyicidir. Bu yüzden hâkim‑savcı‑avukat, kanun yanında Yargıtay/İstinaf kararlarına bakmayı tercih eder. (Akademik özet: mahkeme kararları hukukun yardımcı kaynağıdır.) 
+Açık Ders Malzemeleri
+
+Bağlayıcı istisna: “İçtihadı Birleştirme Kararları (İBK)” 2797 sayılı Yargıtay Kanunu m.45 uyarınca Yargı teşkilatını bağlar. Diğer Yargıtay kararları bağlayıcı değilse de fiilen izlenir. 
+Türkiye Barolar Birliği Dergisi
++2
+LEXPERA
++2
+
+2) Kira artışında TÜFE/“12 aylık ortalama” meselesi ve “neden bulamadık?”
+
+TBK m.344 2019 değişikliği sonrası (7161) kira artışı üst sınırı olarak TÜFE on iki aylık ortalamaları esas alır (işyeri ve konut). Uygulamada ve öğretide bu artık genel kabul. 
+Prof. Dr. İlhan Helvacı Dersleri
++1
+
+Geçici 25% konut artış tavanı (2022–2024/2025 dönemlerinde çeşitli uzatmalarla) konutla sınırlı bir istisnaydı; ticari kiralarda geçerli değildi. (Ayrıntı veren güncel özetler için bakınız.) 
+Mondaq
++2
+BAL Avukatlık Bürosu
++2
+
+Neden senin aramada çıkmamış olabilir?
+
+Diyakritik kaybı: Query varyantlarında “tufe” kullanmışsın; arama motoru diyakritik‑duyarlı ise “TÜFE” eşleşmeyebilir. Kodunda TURKISH_TYPO_CORRECTIONS var ama “tufe → TÜFE”, “tuketici → tüketici” eşlemesi yok.
+
+Genel terimler strict’e girmiş: “yasal” gibi genel bir kelime strict query’e girince gürültüyü artırıyor (çok geniş ve alakasız kararlar).
+
+Alan dilini yakalayamama: Kararlar “kira tespit davası”, “uyarlama”, “TBK m.344”, “on iki aylık ortalama” gibi formüllerle yazılıyor; “kira artış oranı” tek başına yetersiz.
+
+Konut/işyeri ayrımı: Konut (25% tavan dönemleri) ve işyeri (TÜFE 12A ort) ayrımı query’de belirtilmeli.
+
+Varyant sayısı + limit: Toplam 30 metin özetlenmiş; yüksek gürültü varsa doğru kararlar alt sıralarda kalıp seçilmemiş olabilir.
+
+Özet alanını limitliyorsun: summarize_decision içindeki 1000/1500 karakter kesintisi, “TÜFE 12 aylık ortalama” geçen pasajı ıska geçirebilir.
+
+Çözüm: Aşağıda verdiğim diyakritik‑güvenli query genişletme, konut/işyeri niyeti tespiti, article‑synonym expansion, re‑ranker, RRF, iki aşamalı fetch ile bu tip kararlar üst sıralara gelir.
+
+3) Kod Yapısına Kökten İyileştirmeler (≥ %20–30 etkisi)
+
+Aşağıdaki 10 maddeyi uyguladığında hem geri getirme kalitesi hem de gecikme belirgin şekilde iyileşir:
+
+(A) Query üretimini “yüksek sinyal / düşük gürültü” prensibiyle yeniden tasarla
+
+Genel kelimeyi strict’ten çıkar: build_query_buckets içinde stop‑concept listesi tanımlayıp (“yasal”, “sözleşme”, “zam”) strict’e asla alma; bunlar sadece broad varyantlara gitsin.
+
+Madde genişletme: extract_law_articles_from_text çıktılarını şu varyantlarla çoğalt:
+
+TBK 344, TBK m.344, "Türk Borçlar Kanunu 344", "m. 344", "344/1", "344" + "TÜFE", "on iki aylık ortalama".
+
+Konut/İşyeri niyeti: LLM’den gelen kelimeler içinde “konut”, “işyeri”, “ticari” geçiyorsa iki ayrı query ailesi üret (konut ailesine 25% gibi istisna sinyallerini ekle).
+
+Diyakritik varyant üreticisi:
+
+Terim başına diyakritikli ve diyakritiksiz çiftleri üret: tüfe|tüfe|tufe, tüketici|tuketici, ş|s, ğ|g, ı|i.
+
+Fakat her varyantı tek query’ye tıkma. Çok sayıda kısa query üretip RRF ile birleştir.
+
+Reciprocal Rank Fusion (RRF): Varyantlardan dönen listeleri RRF ile kaynaştır; böylece tek bir “şans” kötü gelmişse bile diğerlerinde yükselen kararlar üstte kalır.
+
+Neden işe yarar? “Strict + dar domain terimi + diyakritik güvenliği + RRF” kombinasyonu, gürültülü bir API üzerinde ”doğru kararları ilk sayfaya” taşır.
+
+(B) Paralelleştirme + Orantılı Orkestrasyon
+
+İki aşamalı fetch (büyük kazanç):
+
+Aşama‑1 (metadata‑only): search_yargitay(..., fetch_content=False) ile 100–200 kaydın sadece meta/özet’ini çek.
+
+Aşama‑2 (ranke göre derin okuma): Önceden re‑rank edip ilk 30–40 kaydın tam metnini parallel çek.
+
+Bu strateji band genişliği ve süreyi dramatik düşürür.
+
+Gerçek paralel: requests yerine httpx.AsyncClient + asyncio kullan; Semaphore(4–8) ile adil hız; tenacity ile retry/backoff (429, 5xx).
+
+Akıllı paylaştırma: Query varyantlarını 4 worker havuzunda paralel çalıştır; per‑variant limit’i dinamik belirle (ör. kalan bütçe / kalan varyant).
+
+(C) Re‑ranker ile isabet (hit@k) sıçraması
+
+Çok dilli cross‑encoder re‑ranker ekle (CPU’da da çalışır):
+
+Öneri: jinaai/jina-reranker-v2-base-multilingual (1024 token penceresi, çok dilli). 
+Hugging Face
++1
+
+Alternatifler: BAAI/bge-reranker-v2-m3 (çok dilli, hafif), mixedbread-ai/mxbai-rerank-large-v1 (yüksek kalite). 
+Hugging Face
++2
+Hugging Face
++2
+
+Akış: BM25 benzeri zayıf sinyal (özette geçen anahtar) + cross‑encoder re‑rank → passage kesimi.
+
+Passage re‑rank: Kararı 300–400 kelimelik parçalara böl, her parça için skor al; en iyi 1–2 parçayı LLM’ye ver.
+
+(D) “LLM’i hızlandıran dosya formatı” (okuma verimi ↑, halüsinasyon ↓)
+
+NDJSON passage formatı (taşınabilir): passage.ndjson içinde her satıra şu alanları yaz:
+
+{
+  "id": "doc123",
+  "section": "reasoning",
+  "start": 1245,
+  "end": 1889,
+  "text": "…",
+  "features": {
+    "law_articles": ["TBK 344"],
+    "n_grams": ["tüfe", "on iki aylık ortalama"],
+    "court_weight": 1.2,
+    "date": "2024-07-16"
+  }
+}
+
+
+LLM’ye sadece en iyi 2–3 passage + metadata yolla.
+
+verify_answer aşamasında id + start/end ile kanıt parçasını kontrol et.
+
+4) Somut Kod Değişiklikleri (patch düzeyinde)
+
+Aşağıdaki değişiklikler mevcut yapına minimal sürtünmeyle entegre olur.
+
+4.1 Diyakritik‑güvenli varyant üretimi
+DIACRITIC_PAIRS = {
+    "i": ["i", "ı", "İ", "I"], 
+    "g": ["g", "ğ"], "s": ["s", "ş"], "c": ["c", "ç"],
+    "o": ["o", "ö"], "u": ["u", "ü"], "a": ["a", "â"], 
+    "e": ["e", "ê"]
+}
+
+def generate_diacritic_variants(term: str, max_variants: int = 6) -> List[str]:
+    """'tüketici fiyat endeksi' -> ['tüketici ...', 'tuketici ...', 'TÜFE', 'TUFE', ...]"""
+    base = term.strip()
+    variants = {base}
+    # ham diyakritiksizleştirme
+    asciiish = (base
+        .replace("ğ","g").replace("Ğ","G")
+        .replace("ş","s").replace("Ş","S")
+        .replace("ç","c").replace("Ç","C")
+        .replace("ö","o").replace("Ö","O")
+        .replace("ü","u").replace("Ü","U")
+        .replace("ı","i").replace("I","İ"))
+    variants.add(asciiish)
+
+    # kısa kısaltmalar
+    if "tüketici fiyat endeksi" in base.lower():
+        variants.update(["TÜFE", "TUFE"])
+    if "üretici fiyat endeksi" in base.lower() or "yİ-üfe" in base.lower():
+        variants.update(["ÜFE", "UFE", "Yİ-ÜFE", "YI-UFE"])
+
+    # aşırı patlama olmasın
+    out = list(variants)[:max_variants]
+    return out
+
+
+build_query_buckets içinde other_terms oluştururken diyakritik varyantları add‑one olarak yay.
+
+4.2 Stop‑concept filtreleme ve strict daraltma
+STOP_CONCEPTS = {"yasal", "sözleşme", "zam", "durum", "dava", "mahkeme"}
+# ...
+# strict_terms belirlenirken:
+strict_terms = [t for t in strict_terms if t.lower() not in STOP_CONCEPTS]
+
+4.3 TBK m.344 odaklı domain genleşmesi
+def expand_law_article(article: str) -> List[str]:
+    # "TBK 344/1" -> ["TBK 344", "TBK m.344", "Türk Borçlar Kanunu 344", "344", "TÜFE", "on iki aylık ortalama"]
+    core = re.sub(r'\s+', ' ', article).strip()
+    if "344" in core and "TBK" in core.upper():
+        return [
+            'TBK 344', 'TBK m.344', '"Türk Borçlar Kanunu 344"',
+            '"on iki aylık ortalama"', 'TÜFE', 'tüketici fiyat endeksi'
+        ]
+    return [article]
+
+
+build_query_buckets çağrısında articles listesini bu genişletme ile büyüt.
+
+4.4 İki aşamalı fetch + paralel orkestrasyon
+
+Aşama 1: tüm query varyantlarını paralel çalıştır, fetch_content=False.
+
+Rerank: meta/özet veya ozet/tam_metin elde yoksa esasNo/kararNo/ozet alanları üzerinden BM25 benzeri bir hızlı skor + cross‑encoder re‑ranker.
+
+Aşama 2: ilk 30–40 için fetch_html yap.
+
+search_yargitay’a fetch_content=False geçişini ekle, sonra yeni bir fetch_fulltexts_in_parallel(doc_ids) fonksiyonu yaz.
+
+4.5 Re‑ranker entegrasyonu (HuggingFace, CPU/AVX ile çalışır)
+# pip install transformers torch --index-url https://download.pytorch.org/whl/cpu
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import torch
+
+class CrossEncoderReranker:
+    def __init__(self, model_name="jinaai/jina-reranker-v2-base-multilingual"):
+        self.tok = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModelForSequenceClassification.from_pretrained(model_name)
+        self.model.eval()
+
+    @torch.inference_mode()
+    def score(self, query: str, passages: List[str]) -> List[float]:
+        pairs = [(query, p[:1000]) for p in passages]  # uzunları kırp
+        inputs = self.tok([p[0] for p in pairs], [p[1] for p in pairs],
+                          truncation=True, padding=True, return_tensors="pt", max_length=512)
+        logits = self.model(**inputs).logits.squeeze(-1)
+        return logits.tolist()
+
+def rerank_docs(query: str, docs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    # doc-level: ozet ya da ilk 800 karakter
+    passages = [(d.get("ozet") or d.get("tam_metin", "")[:800]) for d in docs]
+    rer = CrossEncoderReranker()
+    scores = rer.score(query, passages)
+    scored = sorted(zip(docs, scores), key=lambda x: x[1], reverse=True)
+    return [d for d, _ in scored]
+
+
+Model önerileri ve uzun metin penceresi için: Jina Reranker v2, BGE‑m3, Mixedbread Rerank. 
+Hugging Face
++4
+Hugging Face
++4
+jina.ai
++4
+
+4.6 Passage‑level re‑rank + LLM’e minimal bağlam
+
+parse_decision sonrasında 300–400 kelimelik parçalar üret; her parçayı re‑rank edip en iyi 1–2 parçayı summarize_decision prompt’una koy.
+
+summarize_decision’da maks 1.5–2K token bağlam sınırı tutturulur, hız ↑, halüsinasyon ↓.
+
+4.7 Halüsinasyon sıfırlama: id + span doğrulaması
+
+summarize_decision çıktısına şu alanları zorunlu kıl: "evidence": [{"id": "doc", "start": 1245, "end": 1401, "quote": "…"}]
+
+verify_answer içinde quote gerçekten metinde var mı kontrol et; yoksa gerekçeyi sil.
+
+aggregate_decisions sonucunda her gerekçe maddesi en az 1 supporting_cases + evidence içermeli; aksi halde drop.
+
+4.8 RRF ile varyant sonuçlarını kaynaştır
+
+Basit ve etkili:
+
+def rrf_merge(ranklists: List[List[str]], k: int = 60) -> List[str]:
+    scores = {}
+    for rl in ranklists:
+        for r, docid in enumerate(rl):
+            scores[docid] = scores.get(docid, 0) + 1.0/(k + r + 1)
+    return [doc for doc,_ in sorted(scores.items(), key=lambda x: x[1], reverse=True)]
+
+
+strict + broad + diyakritik bütün varyantlardan gelen document_id listelerini RRF ile birleştir.
+
+4.9 Log’ları ölçülebilir hale getir (telemetri)
+
+manifest.json: sorgu zamanı, toplam variant, Hit@10 (kanatlı kontrol: aradığın madde/kelimeyi içeren bir karar ilk 10’da mı?), LLM token ve süre metriği.
+
+tests/docs/sorguXYZ/metrics.json olarak kaydet.
+
+4.10 Cache + hız
+
+requests-cache veya httpx-cache ile 24 saat cache, DOC_URL için LRU.
+
+Aynı document_id ikinci defa istenmesin (halihazırda seen_ids var; full-text için de uygula).
+
+5) Anahtar Kelime Bulma: hatasız Türkçe ve alan dili
+
+TURKISH_TYPO_CORRECTIONS’a ekle:
+
+"tufe":"TÜFE", "tuketici":"tüketici", "on iki":"on iki", "ortalamasi":"ortalaması",
+"yasam":"yaşam", "sozlesme":"sözleşme", "kiraci":"kiracı", "kiraya veren":"kiraya veren"
+
+
+normalize_legal_term içinde kanun maddelerini koru (yapmışsın), diğerlerinde diyakritik düzeltme + varsa sözlükten override.
+
+Alan n‑gramları: “kira tespit davası”, “uyarlama”, “kira uyarlama”, “emsal kira”, “bir önceki kira yılı”, “on iki aylık ortalama”, “TBK 344”.
+
+6) 200–800 sonuçta “LLM hepsini okuyabilir mi?”
+
+Evet, okumamalı. Strateji:
+
+Top‑200 metadata çek,
+
+doc‑level re‑rank ile Top‑60,
+
+passage‑level re‑rank ile Top‑30 (tam metin fetch),
+
+LLM MAP sadece Top‑15 passage üzerinde,
+
+REDUCE + verify.
+
+Bu mimari gürültüde boğulmayı engeller, maliyet ve süreyi düşürür, isabet artar.
+
+7) Re‑ranker kullanmalı mısın? (Evet)
+
+Cross‑encoder re‑ranker’lar Türkçe dahil çok dilli metinlerde BM25/embedding tabanlı ilk aşamayı dikkat çekici biçimde iyileştirir.
+
+Önerilenler ve model kartları:
+
+Jina Reranker v2 Base Multilingual (1024 token chunk, hızlı/kaliteli). 
+Hugging Face
++1
+
+BAAI/BGE‑reranker‑v2‑m3 (hafif, çok dilli). 
+Hugging Face
++1
+
+Mixedbread Rerank v1/v2 (yüksek performans). 
+Hugging Face
++2
+Mixedbread
++2
+
+8) Değerlendirme ve geriye dönük testler
+
+run_tests’e skor ekle:
+
+Recall@50 (soruya uygun bir karar ilk 50’de mi?),
+
+nDCG@10 (RRF+re‑rank sonrası dağılım),
+
+LLM token/latency (MAP/REDUCE).
+
+“Konut %25 tavan” ve “İşyeri TÜFE 12A” için pozitif/negatif örnekler ekle.
+
+Hedef: Recall@50 ≥ %90, isabetli emsal ilk 10’da ≥ %70.
+
+9) Operasyonel ve hukuki dikkat
+
+Hız limiti ve backoff şart; aksi takdirde kaynak servis throttling uygulayabilir.
+
+Robots/ToS ve adil kullanım: Otomatik aramada talep başına isabetli ve ölçülü kal.
+
+10) Örnek: “kira artışı %100” senaryosuna yeni Query Plan
+
+Strict (konut): +"TBK 344" +"on iki aylık ortalama" +"TÜFE"
+
+Strict (işyeri): +"TBK 344" +"işyeri kira" +"TÜFE"
+
+Broad add‑one: +"kira tespit davası", +"uyarlama", +"emsal kira", +"yüzde 25", +"kira uyarlama"
+
+Diyakritik eş: +"tuketici fiyat endeksi" + +"TÜFE"
+
+Negatif (opsiyonel): -+"konut satış" vb.
+
+11) “Müthiş detaylı” ChatGPT Prompt (Türkçe, kopyala‑yapıştır)
+
+Aşağıdaki promptu olduğu gibi başka bir ChatGPT oturumuna ver; kodunu ve örnek çıktılarını da ekle. Modelden kod yamaları + test planı + ölçülebilir hedef ürettirir.
+
+ROL: Kıdemli Bilgi Getirme (IR) ve Hukuk Bilişimi mühendisi olarak davran. Türkçe yanıtla. 
+Amaç: Aşağıdaki Python tabanlı “Yargıtay/İstinaf karar arama + LLM analiz” kodunu, 
+(1) geri getirme isabetini artıracak (≥%20–30), 
+(2) toplam gecikmeyi düşürecek ve 
+(3) halüsinasyonu pratikte sıfırlayacak şekilde MİMARİ ve KOD düzeyinde iyileştir.
+
+GİRDİLER:
+- Kod: <<BURAYA KODU YAPIŞTIR>>
+- Örnek çalışma logları/çıktılar: <<BURAYA LOG/ÇIKTI YAPIŞTIR>>
+- Performans hedefleri:
+  * Recall@50 ≥ %90 
+  * nDCG@10 ≥ %0.70 
+  * Toplam süre (200 meta + 40 fulltext + 15 passage MAP/REDUCE) ≤ X sn (lokal)
+- Kısıtlar:
+  * Kaynak API: bedesten.adalet.gov.tr uç noktaları (SEARCH_URL, DOC_URL)
+  * Query operatörleri: + "..." ve - "..."
+  * Halüsinasyona sıfır tolerans: her iddiaya id+span bazında kanıt
+- Model/araç havuzu:
+  * Cross-encoder re-ranker (CPU dostu): jinaai/jina-reranker-v2-base-multilingual veya BAAI/bge-reranker-v2-m3
+  * asyncio + httpx
+  * tenacity (retry/backoff)
+  * requests-cache/httpx-cache (24 saat)
+- Alan diline özgü sinyaller:
+  * TBK m.344; “TÜFE”, “on iki aylık ortalama”, “kira tespit davası”, “uyarlama”, “emsal kira”
+  * Konut vs. İşyeri ayrımı (25% tavan istisnası sadece konut)
+
+İSTEKLER:
+1) Mimari değişiklikleri “Önce/Sonra” diyagramıyla açıklayıp akış adımlarını yaz.
+2) Kod düzeyinde PATCH öner: 
+   - Diyakritik güvenli varyant üretimi (tüfe ↔ tufe vb.)
+   - build_query_buckets: stop-concept filtreleme, TBK 344 genişletme
+   - İki aşamalı fetch (metadata-only → re-rank → fulltext)
+   - asyncio+httpx ile paralel varyant yürütme (Semaphore 4–8), dinamik per-variant limit
+   - Cross-encoder re-ranker entegrasyonu (doc ve passage bazlı)
+   - Passage kesimi (300–400 kelime), en iyi 1–2 passage’ı LLM’ye ver
+   - verify_answer: id + start/end + quote zorunluluğu ve doğrulaması
+   - RRF kaynaştırma
+   - Telemetri: Hit@10, Recall@50, nDCG@10, token ve süre
+3) Kodda değişen her fonksiyon için “önemli farklılıklar”ı maddeleyip 
+   minimal müdahaleli PR tarzı diff ver.
+4) Test planı: Regression senaryolarını genişlet ve beklenen çıktıları yaz (konut/işyeri).
+5) Ölçüm: Metot bazında hız/maliyet (token) analizi; iyileşme varsayımlarını tablolaştır.
+
+ÇIKTI FORMATIN:
+- Bölüm 1: Mimari Özeti (diyagram + akış)
+- Bölüm 2: Patch’ler (kod blokları, fonksiyon bazlı)
+- Bölüm 3: Test Planı (senaryolar, metrik hedefleri)
+- Bölüm 4: Operasyonel notlar (rate limit, cache)
+- Bölüm 5: Kısa bir “nasıl uygulanır” checklist (1–2 sayfa)
+
+Notlar:
+- “Genel” kelimeleri strict’e alma (“yasal”, “sözleşme”, “zam” gibi).
+- TBK m.344, TÜFE, “on iki aylık ortalama”, “kira tespit davası”, “uyarlama”, “emsal kira” terimlerine ağırlık ver.
+- Re-ranker’ı CPU’da çalışacak şekilde göster. 
+- Tüm örnek kodlar çalışır nitelikte ve minimal bağımlılıklı olsun.
+
+12) Hızlı “Uygula ve kazan” öneri listesi (özet)
+
+ TURKISH_TYPO_CORRECTIONS → TÜFE/tüketici dahil et.
+
+ build_query_buckets → STOP_CONCEPTS uygula; TBK 344 genişlet; diyakritik varyantlar üret.
+
+ RRF ile varyantları kaynaştır.
+
+ İki aşamalı fetch: önce fetch_content=False ile 100–200 meta; sonra re‑rank edilmiş Top‑30–40 için full‑text.
+
+ Cross‑encoder re‑ranker ekle (doc + passage).
+
+ Passage kesimi ve LLM’ye minimal bağlam.
+
+ verify_answer → id+span+quote zorunluluğu.
+
+ Telemetri ve test metrikleri ekle.
+
+Bu set, geri getirme isabetini belirgin artırır; toplam süreyi ise paralelleşme + iki aşamalı fetch sayesinde düşürür.
+
+13) Son bir not: Kaynak/doğrulama
+
+TBK m.344 ve TÜFE (12 aylık ortalama) rejimi 2019 sonrası içtihat ve doktrinde standardize olmuştur; çok sayıda yargı/öğreti örneği ve özet mevcuttur. Yukarıdaki açıklamayı destekleyen doktrin/uygulama referansları için bakınız. 
+Prof. Dr. İlhan Helvacı Dersleri
++1
+
+Konut kiralarında %25 tavan istisnası dönemseldir; güncel durum ve tarih aralıkları için örnek güncellemeler: 
+Mondaq
++2
+BAL Avukatlık Bürosu
++2
+
+Re‑ranker önerileri ve yetenekleri için model kartları: 
+Hugging Face
++4
+Hugging Face
++4
+jina.ai
++4
+
+
+PART 2
+
+Teşekkürler 2 sorum var Tefe tüfeyi elle girdik ama böyle bir çok hukuki terim vardır kaçırabildiğimiz belki binlerce, on binlerce (tefe tüfeyi elle ekleyelim ama diğer sonuçlar için ne yapabiliriz) PC'm RTX 5090, işlemcim 24 çekirdek önerdiğin reranker'ı localde çalıştırabilir miyim? eğer daha iyi dersen ben cohere reranker kullanma taraftarıyım sen yine de benchmarklara bak ben 1 sene önce bundan aşırı memnumdum API'sını bağlayıp kuralım sen ne diyorsun ama developarıma nasıl implement edecek detaylı çıktı ver. Hukuk terimleri için genel olarak sistem şu an chat gpt modeli mi kullanıyoruz? Chat GPT tefe tüfeyi bilmiyor mu ki? Ek bir katman (parallel.ai diye bişey çıktı aratmalar çok ucuz core 1 tl pro 4 tl (pro kullanabiliriz ama 10 dakika sürebiliyor) Biz çıktı kararlarını şu an madde olarak söylüyoruz örneğin Yargıtay 6. Hukuk Dairesi, 20.09.2011, 2011/9059 E., 2011/9216 K. Direkt link de verebilirsek iyi olur mesela (örnek tamamen sallama bi kararın linki https://mevzuat.adalet.gov.tr/ictihat/1177983000?query=ceza) Bu şekilde netleştirsek iyi olur Ne dersin
+
+
+Süper sorular — her biri doğrudan sistem kalitesini etkiliyor. Aşağıda (1) hukuki terim kapsamını nasıl uçtan uca büyütürüz, (2) reranker’ı yerelde (RTX 5090) ve/veya Cohere ile nasıl entegre ederiz, (3) ChatGPT/LLM katmanında neden “TÜFE” kaçabiliyor ve nasıl garantileriz, (4) Parallel.ai gibi ek servisleri mimariye nasıl takarız, (5) karar kartlarında doğrudan link nasıl veririz — hepsini mimari + kod seviyesinde, “kopyala‑yapıştır” uygulanabilir formatta özetledim.
+
+1) “TEFE/TÜFE” gibi binlerce hukuk terimini tek tek elle girmeden kapsama almak
+
+Hedef: Arama/sıralama kalitesini taşıyan terminoloji katmanı kurmak. Tek tek sözlük yapmak yerine, üç katmanlı bir yaklaşım öneriyorum:
+
+(A) Çekirdek (deterministik) sözlük + varyant üreteci
+
+Alan sabitleri: TBK 344, CMK 223, TCK 150/1, “on iki aylık ortalama”, “kira tespit davası”, “uyarlama”, “emsal kira”, “Yİ‑ÜFE/ÜFE”, “TÜFE”, “hakaret”, “manevi tazminat” vb.
+
+Varyant üretici: diyakritik (TÜFE↔TUFE), kısaltma (tüketici fiyat endeksi↔TÜFE), hece varyantı (yüzde 25↔%25; on iki↔12), tire/boşluk varyantları (yİ‑üfe/yi‑üfe/yiüfe) ve çoğul/ek varyantları.
+
+Uygulama: generate_diacritic_variants() gibi bir fonksiyon ile sorgu anında (index tarafını değiştirmeden) 1→N varyant üret. (Aşağıda kod örneği var.)
+
+(B) Kendi kendini büyüten aday madde çıkartımı (otonom veri madenciliği)
+
+Kaynak: Zaten çektiğin tam metin kararlar.
+
+Yöntem:
+
+Bütün metinlerden n‑gram (1–4) frekansları.
+
+“C‑value/NC‑value” veya RAKE tarzı skorlayıcı ile alan terimi olma olasılığını ölç.
+
+LAW_PATTERN ile maddeleri ayıkla, geri kalan adayları LLM‑destekli doğrula (yalnızca “bu aday hukuk terimi mi?” sınıflaması, üretim yok).
+
+Sonuç: Her koşuda yeni adaylar whitelist’e eklenir; blacklist de tutarsın.
+
+Bu sayede “TEFE/TÜFE” gibi kritikler manuel tohum olmakla birlikte, “Yİ‑ÜFE”, “kira uyarlama”, “kira fark alacağı” gibi yüzlercesi otomatik gelir.
+
+(C) Çalışma zamanı (runtime) eş anlamlı ve yazım varyantı genişletme
+
+LLM‑bağımsız kurallar: Diyakritik, sayı/simge (%25↔yüzde 25), kısaltmalar.
+
+Alan eş anlamlıları: “kira tespit davası” ↔ “kira bedelinin tespiti”, “uyarlama” ↔ “aşırı ifa güçlüğü uyarlaması”.
+
+Politika: Bu genişletmeler strict’te değil, broad varyantlarda kullanılmalı; aksi halde gürültü artar.
+
+Sonuç: “Elle TÜFE ekleyelim” kesinlikle yapalım; ama asıl kazanç bu üç katman ile kendi kendini besleyen terminoloji altyapısı kurmaktan gelir.
+
+2) Reranker’ı yerelde mi (RTX 5090) yoksa Cohere ile mi? — Karar ve entegrasyon
+
+Kısa yanıt: İkisi de. RTX 5090 (24+ GB VRAM) ile Jina / BGE / Mixedbread gibi cross‑encoder re‑ranker’ları yerelde gayet rahat çalıştırırsın. Aynı zamanda Cohere Rerank v2 API “plug‑in” olarak eklenebilir; geliştiricinin tek bir arayüzle istediği sağlayıcıyı seçmesini sağlayan bir provider katmanı öneriyorum.
+
+2.1 Yerel (GPU) re‑ranker — önerilen modeller ve kurulum
+
+Jina Reranker v2 Base Multilingual (çok dilli, 1024 bağlam): model kartı ve açıklamaları mevcut. 
+Hugging Face
++1
+
+BAAI BGE‑reranker‑v2‑m3 (çok dilli, hafif/performanslı). 
+Hugging Face
++1
+
+*Mixedbread mxbai‑rerank‑ (v1/v2)**: güçlü doğruluk/çok dilli desteği. 
+Mixedbread
++3
+Hugging Face
++3
+Mixedbread
++3
+
+Kurulum (CUDA):
+
+# CUDA'lı PyTorch (örnek, sistemine uygun wheel'i seç)
+pip install torch --index-url https://download.pytorch.org/whl/cu121
+pip install transformers accelerate
+
+
+Basit kullanım (GPU):
+
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import torch
+
+MODEL_NAME = "jinaai/jina-reranker-v2-base-multilingual"  # veya "BAAI/bge-reranker-v2-m3"
+tok = AutoTokenizer.from_pretrained(MODEL_NAME)
+model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model.to(device).eval()
+
+@torch.inference_mode()
+def rerank_pairs(query: str, passages: list[str]) -> list[float]:
+    inputs = tok([query]*len(passages), passages,
+                 padding=True, truncation=True, max_length=512, return_tensors="pt")
+    inputs = {k: v.to(device) for k, v in inputs.items()}
+    scores = model(**inputs).logits.squeeze(-1).tolist()  # daha büyük daha iyi
+    return scores
+
+
+Yerel re‑ranker ile doc‑level (özet/ilk 800 karakter) ve passage‑level (300–400 kelimelik parçalar) iki aşamalı sıralama yapmanı öneririm. Bu, hatırı sayılır hit@10 artışı getirir.
+
+2.2 Cohere Rerank (API v2) — Türkçe için doğrudan uygun
+
+Endpoint: POST https://api.cohere.com/v2/rerank (SDK: ClientV2).
+
+Model: rerank‑v3.5 en güncel genel model; aynı sayfada rerank‑multilingual‑v3.0 de listeleniyor. Türkçe için ikisi de destekleniyor; genel öneri rerank‑v3.5 veya testte daha iyi çıkarsa rerank‑multilingual‑v3.0. 
+Cohere Documentation
++1
+
+Python (SDK) örneği:
+
+import cohere, os
+co = cohere.ClientV2(api_key=os.environ["COHERE_API_KEY"])
+
+def cohere_rerank(query: str, docs: list[str], top_n: int = 20, model: str = "rerank-v3.5"):
+    resp = co.rerank(model=model, query=query, documents=docs, top_n=top_n)
+    # resp.results -> list, her elemanda index ve relevance_score var
+    return [(r.index, r.relevance_score) for r in resp.results]
+
+
+HTTP (raw) örneği:
+
+import requests, os
+payload = {
+  "model": "rerank-v3.5",
+  "query": "TBK 344 TÜFE on iki aylık ortalama işyeri",
+  "documents": docs,
+  "top_n": 30,
+  "max_tokens_per_doc": 4096
+}
+r = requests.post("https://api.cohere.com/v2/rerank",
+                  headers={"Authorization": f"Bearer {os.environ['COHERE_API_KEY']}"},
+                  json=payload, timeout=30)
+r.raise_for_status()
+scores = [(it["index"], it["relevance_score"]) for it in r.json()["results"]]
+
+
+Kaynak ve model listeleri için resmi dökümantasyon: v2 Rerank, model rehberi. 
+Cohere Documentation
++1
+
+2.3 Hangisi?
+
+Latency ve veri gizliliği kritikse: Yerel (GPU).
+
+Bakım/Model kalitesi ve hızlı deney istiyorsan: Cohere Rerank (Azure Foundry üzerinden de sunuluyor). 
+TECHCOMMUNITY.MICROSOFT.COM
+
+Pratik öneri: Provider katmanı yaz; provider="local"|"cohere"|"parallel" parametresiyle seçilsin. Aşağıda arayüz iskeleti var.
+
+class RerankProvider:
+    def rerank(self, query: str, docs: list[str], top_n: int) -> list[int]:
+        raise NotImplementedError
+
+class LocalHFProvider(RerankProvider):
+    # __init__ ile model yükle
+    def rerank(self, query, docs, top_n):
+        scores = rerank_pairs(query, docs)
+        order = sorted(range(len(docs)), key=lambda i: scores[i], reverse=True)
+        return order[:top_n]
+
+class CohereProvider(RerankProvider):
+    def __init__(self, api_key: str, model: str = "rerank-v3.5"):
+        import cohere
+        self.co = cohere.ClientV2(api_key=api_key); self.model = model
+    def rerank(self, query, docs, top_n):
+        res = self.co.rerank(model=self.model, query=query, documents=docs, top_n=top_n)
+        order = [r.index for r in res.results]
+        return order
+
+
+Not: Mixedbread/BGE/Jina için resmi model kartlarından performans ve çok dillilik desteğini inceleyebilirsin. 
+Jina AI
++7
+Hugging Face
++7
+Mixedbread
++7
+
+3) “ChatGPT TÜFE’yi bilmiyor mu?” — Neden kaçıyor, nasıl garantileriz?
+
+LLM “bilmez” değil; ama senin arama motorun diyakritik‑duyarlı ve prompt’tan “tufe” çıkarsa eşleşme kaçıyor.
+
+Sorun LLM değil, eşleşme katmanı. Bu yüzden “LLM → normalize → varyant üret” boru hattı şart.
+
+Ek olarak strict query’e genel kelimeler (“yasal”, “sözleşme”, “zam”) girince gürültü artar ve doğru kararlar üst sıralara çıkamaz.
+
+Somut yamalar:
+
+TURKISH_TYPO_CORRECTIONS’a “tufe→TÜFE”, “tuketici→tüketici”, “yi-ufe→Yİ‑ÜFE” vb. ekle.
+
+build_query_buckets’ta STOP_CONCEPTS listesi ile strict’ten filtrele.
+
+Diyakritik varyant üreticisini broad varyantlarda add‑one olarak kullan.
+
+RRF ile varyant sonuçlarını birleştir (tek kötü sorgu her şeyi bozamasın).
+
+Kod parçaları (ekle/uyarla):
+
+STOP_CONCEPTS = {"yasal", "sözleşme", "zam", "durum", "dava", "mahkeme"}
+# strict_terms = [t for t in strict_terms if t.lower() not in STOP_CONCEPTS]
+
+def generate_diacritic_variants(term: str) -> list[str]:
+    base = term.strip()
+    variants = {base}
+    asciiish = (base.replace("ğ","g").replace("Ğ","G").replace("ş","s").replace("Ş","S")
+        .replace("ç","c").replace("Ç","C").replace("ö","o").replace("Ö","O")
+        .replace("ü","u").replace("Ü","U").replace("ı","i").replace("I","İ"))
+    variants.add(asciiish)
+    if "tüketici fiyat endeksi" in base.lower(): variants.update(["TÜFE","TUFE"])
+    if "üretici fiyat endeksi" in base.lower() or "yİ-üfe" in base.lower():
+        variants.update(["ÜFE","UFE","Yİ-ÜFE","YI-UFE"])
+    return list(variants)[:6]
+
+4) Parallel.ai gibi ek servisleri mimariye takmak (ucuz ama yavaş olabilir)
+
+Öneri: Yukarıdaki RerankProvider arayüzüne ParallelAIProvider ekle.
+
+Timeout ve bütçe: global RERANK_TIMEOUT=25s, MAX_DOCS_PER_CALL=1000.
+
+Öncelik sırası: Local (GPU) → Cohere (hızlı) → Parallel (düşük maliyet, daha uzun SLA).
+
+Circuit‑breaker: 1–2 başarısızlıktan sonra sağlayıcıyı o süreçte devre dışı bırak.
+
+Böylece “ucuz ama 10 dk sürebilen” bir sağlayıcı, arızalı olsa bile akışı kilitlemez; sonuç geldiyse RRF ile kaynaştırırsın, gelmezse yoluna devam.
+
+5) Karar kartlarına doğrudan link ekleme (örn. /ictihat/{id})
+
+Kodunda zaten:
+
+VIEW_URL = "https://mevzuat.adalet.gov.tr/ictihat/{id}"
+
+
+Bunu her kayıt için dolduralım ve “Final Output”’ta gösterelim:
+
+from urllib.parse import quote
+
+# search_yargitay() içinde, collected.append(...) diktine ekle:
+"view_url": VIEW_URL.format(id=doc_id) + (f"?query={quote(query_signature)}" if query_signature else "")
+
+
+format_legal_output() içinde DAYANAK KARARLAR bölümüne link ekleyelim:
+
+cases_used = verified_answer.get("cases_used", [])
+for case in cases_used:
+    citation = case.get("citation","")
+    url = case.get("view_url") or ""  # cases_used'e de view_url geçir
+    output_lines.append(f"• {citation}")
+    if url:
+        output_lines.append(f"  Link: {url}")
+    output_lines.append(f"  Rolü: {case.get('key_role','')}")
+    output_lines.append("")
+
+
+Not: UYAP Mevzuat’ın “/ictihat/{id}” yolu ve arayüzü bu biçimde çalışıyor; site genel giriş sayfaları ve içtihat bölümü adres şeması için referans. 
+Mevzuat
++1
+
+Ayrıca verified_answer’ı oluştururken cases_used içine view_url’u da taşı:
+
+def pick_nearest_cases(...):
+    # ...
+    cases_used.append({
+        "id": c["id"],
+        "citation": c["citation"],
+        "key_role": reasoning,
+        "view_url": VIEW_URL.format(id=c["id"])
+    })
+
+6) “Developer’a nasıl uygulatırız?” — Adım adım entegrasyon planı
+
+Terminoloji katmanı:
+
+TURKISH_TYPO_CORRECTIONS genişlet.
+
+generate_diacritic_variants() ekle; build_query_buckets()’ta broad add‑one’lara enjekte et.
+
+STOP_CONCEPTS uygula (strict’i temizle).
+
+Aday terim çıkarımı için n‑gram skorlama (C‑value/NC‑value/RAKE) modülü ekle (batch job).
+
+RRF füzyon:
+
+Tüm varyantlardan gelen document_id sıralamalarını RRF ile kaynaştır (10 satırlık fonksiyon).
+
+RRF sonrası Top‑200 meta listesi oluştur.
+
+İki aşamalı fetch:
+
+Aşama‑1: fetch_content=False ile Top‑200 metadata (öz/alanlar).
+
+Doc‑level rerank: Local HF veya Cohere/Parallel provider.
+
+Aşama‑2: Top‑40 için tam metin paralel çek (httpx.AsyncClient + Semaphore(6)).
+
+Passage‑level rerank:
+
+Kararı 300–400 kelimelik parçalara böl; passage re‑rank ile en iyi 1–2 parçayı LLM’e ver.
+
+LLM şablonları:
+
+summarize_decision/aggregate_decisions prompt’larına “sadece verilen metinden, id+span+quote zorunlu” kuralını ekle.
+
+verify_answer id/quote/span kontrolünü deterministik uygula; uymayan gerekçeyi sil.
+
+Linkleme:
+
+search_yargitay → view_url alanı.
+
+cases_used ve “Final Output”’ta link göster.
+
+Telemetri:
+
+Hit@10 / Recall@50 / nDCG@10 / toplam süre / token sayısı; metrics.json’a yaz.
+
+7) Kısa kod parçaları (patch tarzı)
+
+RRF füzyon:
+
+def rrf_merge(ranklists: list[list[str]], k: int = 60) -> list[str]:
+    scores = {}
+    for rl in ranklists:
+        for r, docid in enumerate(rl):
+            scores[docid] = scores.get(docid, 0.0) + 1.0 / (k + r + 1)
+    return [doc for doc, _ in sorted(scores.items(), key=lambda x: x[1], reverse=True)]
+
+
+Cohere provider seçimi (env ile):
+
+RERANK_PROVIDER = os.getenv("RERANK_PROVIDER", "local")  # local|cohere|parallel
+COHERE_MODEL = os.getenv("COHERE_RERANK_MODEL", "rerank-v3.5")  # veya rerank-multilingual-v3.0
+
+
+Yerel → Cohere → Parallel sırası:
+
+providers = []
+if RERANK_PROVIDER in ("local","auto"): providers.append(LocalHFProvider(...))
+if RERANK_PROVIDER in ("cohere","auto"): providers.append(CohereProvider(api_key=..., model=COHERE_MODEL))
+if RERANK_PROVIDER in ("parallel","auto"): providers.append(ParallelAIProvider(...))
+
+def try_rerank(query, docs, top_n):
+    for p in providers:
+        try: return p.rerank(query, docs, top_n)
+        except Exception: continue
+    return list(range(min(top_n, len(docs))))  # fallback: orijinal sıralama
+
+8) SSS — Kısa yanıtlar
+
+“RTX 5090 ile yerel re‑ranker çalışır mı?”
+Evet. Transformers + PyTorch CUDA ile Jina/BGE/Mixedbread’ı GPU’da sorunsuz çalıştırırsın; 512 token pencerede yüksek throughput alırsın. Model kartlarına bakarak uygun boyu seç. 
+Hugging Face
++2
+Hugging Face
++2
+
+“Cohere mi daha iyi, yerel mi?”
+Türkçe için her ikisi de çok güçlü. Kalite/latency/maliyet gereksinimine göre provider katmanı üzerinden A/B yap; sonrasında standartlaştır.
+
+“LLM (ChatGPT) TÜFE’yi niye atladı?”
+LLM çıkarmış olsa bile arama operatörün diyakritik/kısaltma duyarlı. Normalize+varyant üret+strict filtre olmadan kaçış olur. Bu, LLM bilgisinden çok eşleştirme katmanı meselesi.
+
+“Parallel.ai kullanalım mı?”
+Kullanabilirsin; fakat SLA’sı uzun olabiliyorsa timeout/circuit breaker şart. “Sonradan gelen sonuçları RRF ile kaynatma” mekanizmasını kur; gelmezse sistem yürür.
+
+“Doğrudan link verir miyiz?”
+Evet; https://mevzuat.adalet.gov.tr/ictihat/{id} kalıbıyla link doğrudan üret. (Örnek link yapısı için ana site/ref.) 
+Mevzuat
++1
+
+9) Hızlı “Uygula ve kazan” checklist
+
+ STOP_CONCEPTS ile strict’i temizle.
+
+ TÜFE/Yİ‑ÜFE ve diyakritik varyant üreticiyi broad sorgulara enjekte et.
+
+ RRF ile varyant sonuçlarını birleştir.
+
+ İki aşamalı fetch (Top‑200 meta → doc‑rerank → Top‑40 fulltext).
+
+ Passage re‑rank (Top‑15 LLM MAP).
+
+ Provider katmanı (Local HF + Cohere + Parallel).
+
+ id+span+quote doğrulaması (halüsinasyon=0).
+
+ Link alanını tüm çıktılara ekle.
+
+ Telemetri: Hit@10 / Recall@50 / nDCG@10 / süre.
+
+Kaynaklar (seçili, entegrasyon için yeterli)
+
+Cohere Rerank v2 endpoint ve Python örneği; model listesi (v3.5 / multilingual v3.0). 
+Cohere Documentation
++1
+
+Jina Reranker v2 Base Multilingual (model kartı / açıklama). 
+Hugging Face
++1
+
+BAAI BGE‑reranker‑v2‑m3 (model kartı). 
+Hugging Face
++1
+
+Mixedbread Rerank modelleri (v1/v2; çok dilli).
+
+UYAP Mevzuat site yapısına genel referans.
+
+İstersen, yukarıdaki patch’leri tek bir PR şeklinde sade bir diff ile toplayıp verebilirim; ya da önce Cohere provider + linkleme + RRF + iki aşamalı fetch’i entegre edip, ardından passage re‑rank ve id+span kanıtlama adımını ekleriz. Bu dört adım tek başına isabeti ve stabiliteyi ciddi ölçüde artırıyor.
+
+
+DEĞERLENDİRME SONUÇ:
+
+Sahaya çok yakın bir iş çıkarmışsın. Özellikle RRF füzyon, iki aşamalı (metadata→fulltext) getirme, provider‑bazlı re‑ranker katmanı, diyakritik varyant üretimi, link alanının nesnelere eklenmesi ve passage‑seviyesinde özetleme yönündeki adımlar yerinde. Aşağıda hem başarıyla uygulananlar, hem de gördüğüm kritik bug/iyileştirme kalemlerini sıralıyorum. Kod parçaları doğrudan kopyalanıp uygulanabilir.
+
+Özet Değerlendirme
+
+Başarıyla eklenenler
+
+Reranker sağlayıcı soyutlaması: LocalHFReranker, CohereReranker, ParallelReranker çatısı doğru.
+
+RRF füzyon: rrf_merge ile varyant sıralamalarını tekleştirmen yerinde.
+
+İki aşamalı akış: önce metadata (geniş), sonra fulltext (daraltılmış) çekiyorsun.
+
+Diyakritik/alias genişletme: generate_diacritic_variants, expand_law_article, STOP_CONCEPTS — recall için kritik.
+
+Passage kesimi: parse_decision içinde 300–400 kelimelik pasajlar üretmen LLM’e temiz bağlam veriyor.
+
+Link alanı: view_url’u dokümanlara eklemişsin.
+
+Ana tespitler (önem sırasına göre)
+
+Kritik bug: summarize_decision() içinde JSON parse hata yolunda tanımsız değişken kullanımı (UnboundLocalError riski).
+
+Strict fallback STOP filtresi atlanıyor: Strict’te tek terim kalınca “first other” eklenirken “yasal/…“ gibi STOP terimleri yeniden strict’e giriyor (log: +"kira artış oranı" +"yasal").
+
+Tam metin çekimi seri (76 karar ≈ 162 sn): enrich_full_texts() eşzamanlı; paralel hale getirilmesi gerekiyor.
+
+Rerank defaults: RERANK_PROVIDER=none varsayılanı nedeniyle çoğu koşuda re‑ranker devreye girmiyor; auto mantığına dönmeli.
+
+URL’nin son çıktıda gösterilmemesi: Link nesnede var ama format_legal_output() göstermiyor.
+
+Aggregate → cases_used içi linkler: LLM’in döndürdüğü cases_used içinde URL yok; deterministik post‑enrichment ile her ID’ye URL eklenmeli.
+
+async_search_yargitay parsingi: Sync _extract_rows ile uyumlu değil; gerçek şema emsalKararList iken async versiyon list/content/items bekliyor (şu an kullanılmıyor ama ileride sorun çıkarır).
+
+Passage re‑rank çağrısı isimlendirme/niyet: order = rerank_docs(...) ile dönen şey sıralanmış doküman listesi, isim order kafa karıştırıyor (işlevsel sorun yok).
+
+Aşağıya, her kalem için mini‑patch ve kısa gerekçe koyuyorum.
+
+1) Bug: summarize_decision JSON parse fallback’ında tanımsız değişken
+
+Sorun
+Reranker devredeyken selected_passages doluyor; bu durumda facts_text/reasoning_text hiç tanımlanmıyor. Parse hatasında bu değişkenler kullanılıyor → UnboundLocalError.
+
+Düzeltme (en az dokunuş)
+
+def summarize_decision(decision_json: Dict[str, Any], question: str) -> Dict[str, Any]:
+    passages = decision_json.get("passages") or []
+    selected_passages: List[str] = []
+    # Her ihtimale karşı güvenli defaultlar:
+    fallback_facts = ""
+    fallback_reasoning = ""
+
+    if passages and (RERANK_PROVIDER and RERANK_PROVIDER != "none"):
+        texts = [p.get("text", "")[:800] for p in passages]
+        ordered_docs = rerank_docs(question, [{"tam_metin": t} for t in texts], top_n=min(2, len(texts)))
+        ranked_texts = [d.get("tam_metin", "") for d in ordered_docs]
+        selected_passages = [t for t in ranked_texts if t][:2]
+
+    if not selected_passages:
+        # eski mantık
+        for section in decision_json.get("sections", []):
+            if section["name"] == "facts" and not fallback_facts:
+                fallback_facts = section["text"][:1000]
+            elif section["name"] == "reasoning" and not fallback_reasoning:
+                fallback_reasoning = section["text"][:1500]
+        if not fallback_facts and not fallback_reasoning:
+            sections = decision_json.get("sections") or []
+            first_section = sections[0] if sections else {"text": ""}
+            fallback_facts = first_section.get("text", "")[:2000]
+        selected_passages = [fallback_facts, fallback_reasoning]
+
+    context = "\n\n".join([p for p in selected_passages if p])
+
+    # ... LLM çağrısı ...
+    try:
+        result = json.loads(response_clean)
+    except Exception:
+        result = {
+            "is_relevant_to_question": False,
+            "result_for_question": "unclear",
+            "facts_short": (fallback_facts or (selected_passages[0] if selected_passages else ""))[:200],
+            "reasoning_short": (fallback_reasoning or (selected_passages[1] if len(selected_passages) > 1 else ""))[:200],
+            "key_points": [],
+            "evidence": []
+        }
+
+
+Ayrıca order değişken adını ordered_docs yaptım; niyeti netleşir.
+
+2) Strict fallback STOP filtresi (yasal/… tekrar strict’e sızıyor)
+
+Sorun
+Strict’te tek terim kalınca “first other” ekleme kuralın STOP listesini tekrar çalıştırmıyor. Bu yüzden +"kira artış oranı" +"yasal" gibi strict’ler oluşuyor.
+
+Patch
+
+# Mevcut:
+if len(strict_terms) == 1:
+    for kw in keywords:
+        if kw.get("type") == "other" and kw.get("text") not in strict_terms:
+            strict_terms.append(kw["text"])
+            break
+
+# Önerilen:
+if len(strict_terms) == 1:
+    for kw in keywords:
+        t = kw.get("text", "")
+        if kw.get("type") == "other" and t and t.lower() not in STOP_CONCEPTS and t not in strict_terms:
+            strict_terms.append(t)
+            break
+
+
+İstersen filtered_terms adımını yeniden çalıştırıp aynı temizliği garanticilik için tekrar edebilirsin.
+
+3) Full‑text çekimini paralelleştir (162 sn → ~X sn)
+
+Sorun
+enrich_full_texts() seri; her karar için requests.post() yapıyorsun. 50–200 karar için süre uzuyor.
+
+ThreadPool ile basit paralelleştirme
+
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+def enrich_full_texts(docs: List[Dict[str, Any]], limit: int, max_workers: int = 8) -> List[Dict[str, Any]]:
+    targets = docs[:limit]
+    out = [None] * len(targets)
+
+    def _fetch(idx_doc):
+        idx, doc = idx_doc
+        did = doc.get("document_id")
+        if not did:
+            return idx, doc
+        full_text = fetch_html(did)
+        parsed = _try_parse_json(full_text)
+        if _is_metadata_error(parsed):
+            return idx, doc
+        normalized = _extract_html(parsed) or full_text
+        normalized = _html_to_text(normalized)
+        doc2 = dict(doc); doc2["tam_metin"] = normalized
+        return idx, doc2
+
+    with ThreadPoolExecutor(max_workers=max_workers) as ex:
+        futures = [ex.submit(_fetch, (i, d)) for i, d in enumerate(targets)]
+        for f in as_completed(futures):
+            i, doc2 = f.result()
+            out[i] = doc2
+    # None kalan yoksa düz liste döndür
+    return [d for d in out if d is not None]
+
+
+Alternatif olarak httpx.AsyncClient ile tam asenkron yazılabilir; ancak yukarıdaki patch minimum değişiklikle ciddi hız kazandırır. max_workers’ı 8–16 arası dene.
+
+4) Rerank varsayılan davranışı (kapalı geliyor)
+
+RERANK_PROVIDER default’un "none". Çoğu kullanıcı env set etmediği için re‑rank hiç çalışmıyor. auto daha iyi varsayılan:
+
+RERANK_PROVIDER = os.environ.get("RERANK_PROVIDER", "auto").lower()
+
+
+pick_reranker() içinde de sıralama iyi: Local (varsa) → Cohere (api key varsa) → Parallel.
+
+Ayrıca rerank_docs()’a kısa bir log ekleyip hangi provider’ın seçildiğini yazdırmak tanılama için faydalı olur.
+
+5) URL’leri final çıktıda göster
+
+Sorun
+view_url alanını karara ekliyorsun ama format_legal_output() göstermiyor.
+
+Patch
+
+cases_used = verified_answer.get("cases_used", [])
+for case in cases_used:
+    citation = case.get("citation", "")
+    key_role = case.get("key_role", "")
+    url = case.get("url") or case.get("view_url") or ""
+    output_lines.append(f"• {citation}")
+    if url:
+        output_lines.append(f"  Link: {url}")
+    output_lines.append(f"  Rolü: {key_role}")
+    output_lines.append("")
+
+6) LLM’in ürettiği cases_used’a URL eklemek (post‑enrichment)
+
+Sorun
+aggregate_decisions prompt’unun şemasında URL yok; LLM’in döndürdüğü cases_used tipik olarak URL içermiyor. Kimlik→URL eşlemesini deterministik ekleyelim.
+
+Patch (run_llm_pipeline içinde verify sonrası)
+
+# Halüsinasyon kontrolünden sonra:
+id2url = {c.get("id"): c.get("view_url") or c.get("url") for c in decision_cards if c.get("id")}
+for cu in verified_answer.get("cases_used", []):
+    if not cu.get("url") and id2url.get(cu.get("id")):
+        cu["url"] = id2url[cu["id"]]
+
+
+Böylece LLM ne üretirse üretsin, ID üzerinden doğru linki eklemiş olursun. pick_nearest_cases() fallback’inde zaten URL’i koymuşsun — bu adım LLM’li yola da garanti getirir.
+
+7) async_search_yargitay şema uyumu
+
+Async versiyon emsalKararList yerine list/content/items arıyor. Sync _extract_rows ile aynı şemayı kullan:
+
+async def _extract_rows_async(blob: dict) -> Tuple[list, Optional[int]]:
+    rows = []
+    total = None
+    data = blob.get("data")
+    if isinstance(data, dict):
+        if isinstance(data.get("emsalKararList"), list):
+            rows = [r for r in data["emsalKararList"] if isinstance(r, dict)]
+        elif isinstance(data.get("data"), list):
+            rows = [r for r in data["data"] if isinstance(r, dict)]
+        elif isinstance(data.get("results"), list):
+            rows = [r for r in data["results"] if isinstance(r, dict)]
+        total = (data.get("recordsTotal") or data.get("totalElements") or data.get("total") or
+                 data.get("totalCount") or data.get("recordCount"))
+    elif isinstance(data, list):
+        rows = [r for r in data if isinstance(r, dict)]
+    if isinstance(total, str) and total.isdigit():
+        total = int(total)
+    if total is not None and not isinstance(total, int):
+        total = None
+    return rows, total
+
+8) Sorgu varyant sınırı ve “TÜFE/12 aylık ortalama” sinyali
+
+Log’da broad varyantlar 6 ile sınırlı ve “12 aylık / on iki aylık ortalama” türevleri ilk 6’ya girmemiş. Bu, kritik eşanlamlıların kesilmesine yol açıyor.
+
+Öneriler
+
+MAX_BROAD_VARIANTS’ı 10–12 yap (özellikle kira/tüfe senaryolarında).
+
+“Kanun maddesi bağlı eşanlamlılar”ı (TBK 344 → TÜFE / 12 aylık ortalama) yüksek öncelikli add‑one varyantlar olarak öne al.
+
+STOP_CONCEPTS’te kalan “sözleşme/zam” gibi kelimeleri strict’te tutma; broad’a add‑one olarak gidebilir ama düşük öncelik ver.
+
+9) Küçük ama etkili temizlikler
+
+generate_diacritic_variants: "yiu-fe" iki kez ekleniyor; set olduğu için önemsiz ama gereksiz.
+
+verify_answer: passages = card.get("passages") satırı “card” nesnesinde yok (o, özet); zaten fallback yapıyorsun. İstersen id→fulltext map’iyle kanıt metnini kararın gerçek fulltext’inden doğrula.
+
+search_yargitay: requests.Session kullanımı ve HTTP keep‑alive ikincil hız kazanımı sağlar.
+
+sort_key: “kritik daire bonusu” kuralını bir konfigürasyona al (ceza/hukuk daireleri farklı ağırlıklar alabilir).
+
+10) Çalışma çıktısına ilişkin yorum (paylaştığın koşu)
+
+Strict’te +"kira artış oranı" +"yasal" görünmesi, yukarıdaki STOP fallback bug’ının canlı kanıtı. Bu düzeltmeden sonra ilgili oran/TBK 344 sinyali güçlü strict üreteceksin.
+
+Broad’da “tufe” varyantı çıkmış ama “12 aylık / on iki aylık ortalama” görünmüyor — varyant sınırına takılmış. Sınırı yükseltmen ve TBK 344 eşanlamlılarını önceliklendirmen gerekli.
+
+Relevancy oranı (5/30) düşük — bu, strict sinyali zayıf (yasal/…) ve passage seçiminin yeterince odaklanmamasıyla alakalı. Strict düzeldikten ve re‑ranker default açıldıktan sonra belirgin artış beklenir.
+
+Süre (162 sn): Full‑text paralelleştirme ile dramatik düşer.
+
+11) “Hızlı kazanç” checklist
+
+ Bug fix: summarize_decision fallback değişkenleri.
+
+ Strict fallback: STOP filtresi uygulansın.
+
+ Full‑text paralel (ThreadPoolExecutor(max_workers=8..16)).
+
+ Rerank default: auto.
+
+ Broad limit: 10–12; TBK 344 eşanlamlıları önceliklendir.
+
+ Final output: Linkleri yazdır; cases_used’a URL post‑enrichment.
+
+ async_search_yargitay: şema uyumu.
+
+12) (İsteğe bağlı) İki küçük API/şema iyileştirmesi
+
+CONCEPT_TO_ARTICLE: “kira artış oranı” → “TBK 344”, “kira tespit davası” → “TBK 344/3”, “beş yıl” → “TBK 344/3” eşleşmelerini strict sinyallerine kat.
+
+Kaynak şeffaflık: decision_cards.ndjson içinde her karta url’ü de yaz (zaten meta’da var); dış sistemler linkten direkt açabilsin.
+

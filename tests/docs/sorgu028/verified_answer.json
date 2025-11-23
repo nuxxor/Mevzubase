@@ -1,0 +1,38 @@
+{
+  "verdict": "uygulanamaz",
+  "reasoning": [
+    {
+      "text": "Kiraya verenin %100 zam yapması yasal değildir.",
+      "supporting_cases": [
+        "318225000"
+      ]
+    },
+    {
+      "text": "Kira artış oranı, sözleşmede belirlenen sınırlamalara uygun olmalıdır.",
+      "supporting_cases": [
+        "546889200",
+        "467708800"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "318225000",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 15.02.2017, 2017/1490 E., 2017/1430 K.",
+      "key_role": "Kiraya verenin %100 zam yapması yasal değildir.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/318225000?query=%2B%22kira%20art%C4%B1%C5%9F%22%20%2B%22TBK%20344%22"
+    },
+    {
+      "id": "546889200",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 15.10.2019, 2019/1914 E., 2019/7955 K.",
+      "key_role": "Kira bedelinin artış oranı, hâkim tarafından belirlenir.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/546889200?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22TBK%20344%22"
+    },
+    {
+      "id": "467708800",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 17.12.2018, 2017/4927 E., 2018/12855 K.",
+      "key_role": "Kira artış oranı TEFE TÜFE oranında belirlenmiştir.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/467708800?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22TBK%20344%22"
+    }
+  ]
+}

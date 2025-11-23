@@ -1,0 +1,7 @@
+{
+  "question": "Nitelikli yağma suçundan yargılanan bir kişi mağduru yağma olayından önce hırsızlıktan şikayet ederse fakat şikayet takipsizlikle sonuçlanırsa somut olaya yine de TCK 150/1 uygulanabilir mi?",
+  "run_dir": "tests\\docs\\sorgu001",
+  "max_docs": 12,
+  "model": "gpt-4o-mini",
+  "output": "tests\\docs\\sorgu001\\analysis_chatgpt.txt"
+}

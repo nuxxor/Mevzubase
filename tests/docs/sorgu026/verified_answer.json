@@ -1,0 +1,43 @@
+{
+  "verdict": "uygulanamaz",
+  "reasoning": [
+    {
+      "text": "Kira sözleşmesinde artış şartı yoksa, kiraya veren kira artışı yapamaz.",
+      "supporting_cases": [
+        "627526500"
+      ]
+    },
+    {
+      "text": "Kiraya verenin %100 zam yapması, sözleşme hükümlerine aykırıdır.",
+      "supporting_cases": [
+        "388363600"
+      ]
+    },
+    {
+      "text": "Kira artış oranı, sözleşmede belirlenen oranlara göre yapılmalıdır.",
+      "supporting_cases": [
+        "97313600"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "627526500",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 18.01.2012, 2011/16845 E., 2012/1001 K.",
+      "key_role": "Kira sözleşmesinde artış şartı yoksa, kiraya veren kira artışı yapamaz.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/627526500?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22s%C3%B6zle%C5%9Fme%22"
+    },
+    {
+      "id": "388363600",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 06.12.2017, 2017/6950 E., 2017/17136 K.",
+      "key_role": "Kiraya verenin %100 zam yapması, sözleşme hükümlerine aykırıdır.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/388363600?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22s%C3%B6zle%C5%9Fme%22"
+    },
+    {
+      "id": "97313600",
+      "citation": "Yargıtay 6. Hukuk Dairesi, 08.05.2014, 2014/4257 E., 2014/5925 K.",
+      "key_role": "Kira artış oranı, sözleşmede belirlenen oranlara göre yapılmalıdır.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/97313600?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22s%C3%B6zle%C5%9Fme%22"
+    }
+  ]
+}

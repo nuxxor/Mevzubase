@@ -54,7 +54,7 @@ class Yargitay2Connector(BaseConnector):
         use_browser_fallback: bool = False,
     ) -> None:
         self.page_size = page_size
-        self.item_type_list = item_type_list or []
+        self.item_type_list = item_type_list or ["YARGITAYKARARI"]
         self.window_days = window_days
         self.use_live = use_live
         self.headless = headless
@@ -211,6 +211,7 @@ class Yargitay2Connector(BaseConnector):
     def _build_payload(self, start: date, end: date, page: int) -> dict:
         start_dt = datetime(start.year, start.month, start.day)
         end_dt = datetime(end.year, end.month, end.day, 23, 59, 59)
+        types = self.item_type_list if self.item_type_list else ["YARGITAYKARARI"]
         return {
             "applicationName": "UyapMevzuat",
             "paging": True,
@@ -219,7 +220,7 @@ class Yargitay2Connector(BaseConnector):
                 "pageNumber": page,
                 "kararTarihiStart": start_dt.strftime(ISO_WITH_MS),
                 "kararTarihiEnd": end_dt.strftime(ISO_WITH_MS),
-                "itemTypeList": self.item_type_list,
+                "itemTypeList": types,
                 "orderByList": [
                     {"field": "kararTarihi", "order": "ASC"},
                     {"field": "documentId", "order": "ASC"},
