@@ -67,7 +67,7 @@ CHAT_GPT_MODEL = os.environ.get("CHAT_GPT_MODEL", "gpt-4o-mini")
 OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions"
 COHERE_API_KEY = os.environ.get("COHERE_API_KEY")
 PARALLEL_API_KEY = os.environ.get("PARALLEL_API_KEY")
-RERANK_PROVIDER = os.environ.get("RERANK_PROVIDER", "auto").lower()  # none|local|cohere|parallel|auto
+RERANK_PROVIDER = os.environ.get("RERANK_PROVIDER", "none").lower()  # none|local|cohere|parallel|auto
 RERANK_MODEL = os.environ.get("RERANK_MODEL", "BAAI/bge-reranker-v2-m3")
 RERANK_FALLBACK_MODEL = os.environ.get("RERANK_FALLBACK_MODEL", "jinaai/jina-reranker-v2-base-multilingual")
 RERANK_TRUST_REMOTE_CODE = os.environ.get("RERANK_TRUST_REMOTE_CODE", "true").lower() in {"1", "true", "yes", "on"}
@@ -78,7 +78,7 @@ MIN_TERMS = 3
 ACCEPTED_ITEM_TYPES = {"YARGITAYKARAR", "YARGITAYKARARI", "YARGITAY", "ISTINAFHUKUK", "ISTINAFCEZA"}
 
 # Multi-query retrieval config
-MAX_BROAD_VARIANTS = 10  # en fazla kaç farklı varyant üreteceğiz
+MAX_BROAD_VARIANTS = 6  # en fazla kaç farklı varyant üreteceğiz
 
 SOURCE_CONFIG = {
     "yargitay": {"label": "Yargıtay", "item_types": ["YARGITAYKARARI"]},
@@ -234,7 +234,7 @@ def safe_print(text):
             "🌐": "[API]", "📊": "[SONUC]", "📖": "[ANALIZ]",
             "💾": "[KAYIT]", "📄": "[DOSYA]", "✅": "[TAMAM]",
             "❌": "[HATA]", "🔄": "[ITER]", "✨": "[BASARI]",
-            "📌": "[NOT]", "ℹ️": "[BILGI]"
+            "📌": "[NOT]", "ℹ️": "[BILGI]", "⏭️": "[SKIP]"
         }
         for emoji, replacement in replacements.items():
             text = text.replace(emoji, replacement)
@@ -250,12 +250,58 @@ def _ascii_fold(s: str) -> str:
          .replace("ü", "u").replace("Ü", "U")
     )
 
+
+def _lexical_overlap_score(query: str, text: str) -> float:
+    """Basit kelime kesişim skoru (ascii-fold + lower)."""
+    if not query or not text:
+        return 0.0
+    q_tokens = set(re.findall(r"[a-z0-9çğıöşü]+", _ascii_fold(query.lower())))
+    t_tokens = set(re.findall(r"[a-z0-9çğıöşü]+", _ascii_fold(text.lower())))
+    if not q_tokens or not t_tokens:
+        return 0.0
+    inter = len(q_tokens & t_tokens)
+    return inter / max(1, len(q_tokens))
+
 def _has_kira_domain(keywords: List[Dict[str, Any]]) -> bool:
     blob = " ".join(kw.get("text", "").lower() for kw in keywords)
     folded = _ascii_fold(blob)
     signals = ["kira artış", "kira bedel", "kira sözleş", "kira tespit"]
     ascii_signals = ["kira artis", "kira bedel", "kira sozles", "kira tespit"]
     return any(sig in blob for sig in signals) or any(sig in folded for sig in ascii_signals)
+
+
+def _has_tufe_signal(text_blob: str) -> bool:
+    """TBK 344 / TÜFE / 12 aylık ortalama sinyali var mı."""
+    t = _ascii_fold(text_blob.lower())
+    return any(
+        key in t
+        for key in [
+            "tbk 344",
+            "tufe",
+            "12 aylik ortalama",
+            "tuketici fiyat endeksi",
+            "tüfe",
+            "on iki aylik ortalama",
+        ]
+    )
+
+
+def _extract_percent_values(text: str) -> List[int]:
+    """Metindeki yüzde değerlerini (%, yüzde) yakalar."""
+    if not text:
+        return []
+    vals: List[int] = []
+    patterns = [
+        r"%\s*(\d{1,3})",
+        r"y[uü]zde\s*(\d{1,3})",
+    ]
+    for pat in patterns:
+        for m in re.finditer(pat, text, flags=re.IGNORECASE):
+            try:
+                vals.append(int(m.group(1)))
+            except Exception:
+                continue
+    return vals
 
 def add_domain_seeds(question: str, keywords: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Kira/konut bağlamında deterministik TBK 344 / TÜFE sinyallerini ekler."""
@@ -751,8 +797,25 @@ def rerank_docs(query: str, docs: List[Dict[str, Any]], top_n: int = RERANK_TOP_
     if not docs:
         return docs
     reranker = pick_reranker()
+    # Lexical fallback: basit overlap skoruyla sırala
     if reranker is None:
-        return docs
+        texts = []
+        for d in docs:
+            texts.append(d.get("ozet") or (d.get("tam_metin") or "")[:800])
+        scored = [
+            (idx, _lexical_overlap_score(query, text))
+            for idx, text in enumerate(texts)
+        ]
+        scored.sort(key=lambda x: x[1], reverse=True)
+        order = [idx for idx, score in scored if score > 0][:min(top_n, len(docs))]
+        if not order:
+            return docs
+        ordered = [docs[i] for i in order if i < len(docs)]
+        seen_idx = set(order)
+        for idx, doc in enumerate(docs):
+            if idx not in seen_idx:
+                ordered.append(doc)
+        return ordered
     texts = []
     for d in docs:
         text = d.get("ozet") or (d.get("tam_metin") or "")[:800]
@@ -1460,6 +1523,40 @@ def _call_llm(prompt: str, model: Optional[str] = None, temperature: float = 0.2
     else:
         return _call_ollama(prompt, model=model, temperature=temperature, timeout=timeout)
 
+
+def _strip_json_markers(text: str) -> str:
+    """```, ```json gibi blok işaretlerini temizler."""
+    t = text.strip()
+    if t.startswith("```"):
+        t = re.sub(r'^```(?:json)?\s*', '', t)
+        t = re.sub(r'\s*```$', '', t)
+    return t.strip()
+
+
+def _safe_json_loads(raw: str):
+    """JSON yüklemeyi dener; başarısız olursa None döner."""
+    try:
+        return json.loads(raw)
+    except Exception:
+        return None
+
+
+def _repair_json_with_llm(raw_response: str, schema_hint: str, temperature: float = 0.0) -> Optional[dict]:
+    """
+    İlk parse başarısız olduğunda, LLM'den sadece geçerli JSON üretmesini ister.
+    schema_hint: Beklenen alanları anlatan kısa metin.
+    """
+    repair_prompt = (
+        "Aşağıda hatalı veya eksik JSON var. Sadece geçerli JSON döndür.\n"
+        f"Şema ipucu: {schema_hint}\n"
+        "Kod bloğu veya açıklama yazma, direkt JSON ile yanıtla.\n\n"
+        f"Hatalı JSON:\n{raw_response}\n\n"
+        "Geçerli JSON:"
+    )
+    fixed = _call_llm(repair_prompt, temperature=temperature)
+    fixed = _strip_json_markers(fixed)
+    return _safe_json_loads(fixed)
+
 def extract_law_articles_from_text(text: str) -> List[str]:
     """
     Metinden deterministik olarak kanun maddelerini çıkarır (LLM'den bağımsız).
@@ -1623,13 +1720,16 @@ def summarize_decision(decision_json: Dict[str, Any], question: str) -> Dict[str
     selected_passages: List[str] = []
     fallback_facts = ""
     fallback_reasoning = ""
-    if passages and (RERANK_PROVIDER and RERANK_PROVIDER != "none"):
+    if passages:
         texts = [p.get("text", "")[:800] for p in passages]
+        # Reranker varsa onu kullan; yoksa lexical fallback zaten rerank_docs içinde
         ordered_docs = rerank_docs(question, [{"tam_metin": t} for t in texts], top_n=min(2, len(texts)))
-        # rerank_docs doküman listesi döndüğü için eşleştirelim
-        # Sıralamayı korumak için orijinal indexlere göre toparla
         ranked_texts = [doc.get("tam_metin", "") for doc in ordered_docs]
         selected_passages = [t for t in ranked_texts if t][:2]
+        # Eğer hala boşsa lexical fallback ile manuel seç
+        if not selected_passages:
+            scored = sorted(passages, key=lambda p: _lexical_overlap_score(question, p.get("text", "")), reverse=True)
+            selected_passages = [p.get("text", "") for p in scored[:2] if p.get("text")]
     if not selected_passages:
         for section in decision_json.get("sections", []):
             if section["name"] == "facts":
@@ -1674,19 +1774,23 @@ def summarize_decision(decision_json: Dict[str, Any], question: str) -> Dict[str
     
     response = _call_llm(prompt, temperature=0.1, timeout=60)
     
-    # JSON parse (markdown stripping ile)
-    try:
-        # Markdown code block'ları temizle
-        response_clean = response.strip()
-        if response_clean.startswith("```"):
-            response_clean = re.sub(r'^```(?:json)?\s*', '', response_clean)
-            response_clean = re.sub(r'\s*```$', '', response_clean)
-            response_clean = response_clean.strip()
-        
-        result = json.loads(response_clean)
-    except Exception as e:
-        logger.error(f"summarize_decision JSON parse hatası: {e}")
-        # Fallback
+    # JSON parse + onarım
+    result = None
+    response_clean = _strip_json_markers(response)
+    parsed = _safe_json_loads(response_clean)
+    if isinstance(parsed, dict):
+        result = parsed
+    else:
+        repaired = _repair_json_with_llm(
+            response,
+            schema_hint="is_relevant_to_question (bool), result_for_question, facts_short, reasoning_short, key_points (list), evidence (list of {quote,char_start,char_end})",
+            temperature=0.0,
+        )
+        if isinstance(repaired, dict):
+            result = repaired
+    
+    if not isinstance(result, dict):
+        logger.error("summarize_decision JSON parse başarısız, fallback kullanılıyor")
         result = {
             "is_relevant_to_question": False,
             "result_for_question": "unclear",
@@ -1796,21 +1900,21 @@ def aggregate_decisions(decision_cards: List[Dict[str, Any]], question: str) -> 
     
     response = _call_llm(prompt, temperature=0.1, timeout=90)
     
-    # JSON parse (markdown stripping ile)
-    try:
-        # Markdown code block'ları temizle
-        response_clean = response.strip()
-        if response_clean.startswith("```"):
-            # ```json veya ``` ile başlıyorsa temizle
-            response_clean = re.sub(r'^```(?:json)?\s*', '', response_clean)
-            response_clean = re.sub(r'\s*```$', '', response_clean)
-            response_clean = response_clean.strip()
-        
-        result = json.loads(response_clean)
-    except Exception as e:
-        logger.error(f"aggregate_decisions JSON parse hatası: {e}")
+    # JSON parse + onarım
+    response_clean = _strip_json_markers(response)
+    result = _safe_json_loads(response_clean)
+    if not isinstance(result, dict):
+        repaired = _repair_json_with_llm(
+            response,
+            schema_hint='verdict (uygulanabilir|uygulanamaz|belirsiz), reasoning:[{text,supporting_cases}], cases_used:[{id,citation,key_role}]',
+            temperature=0.0,
+        )
+        if isinstance(repaired, dict):
+            result = repaired
+    
+    if not isinstance(result, dict):
+        logger.error("aggregate_decisions JSON parse hatası, fallback kullanılıyor")
         logger.error(f"LLM response: {response[:500]}")
-        # Fallback
         result = {
             "verdict": "belirsiz",
             "reasoning": [{
@@ -1862,18 +1966,20 @@ def verify_answer(question: str, decision_cards: List[Dict[str, Any]],
     
     response = _call_llm(prompt, temperature=0.0, timeout=60)
     
-    # JSON parse (markdown stripping ile)
-    try:
-        # Markdown code block'ları temizle
-        response_clean = response.strip()
-        if response_clean.startswith("```"):
-            response_clean = re.sub(r'^```(?:json)?\s*', '', response_clean)
-            response_clean = re.sub(r'\s*```$', '', response_clean)
-            response_clean = response_clean.strip()
-        
-        result = json.loads(response_clean)
-    except Exception as e:
-        logger.error(f"verify_answer JSON parse hatası: {e}")
+    # JSON parse + onarım
+    response_clean = _strip_json_markers(response)
+    result = _safe_json_loads(response_clean)
+    if not isinstance(result, dict):
+        repaired = _repair_json_with_llm(
+            response,
+            schema_hint='verdict, reasoning (list), cases_used (list), supporting_cases id\'leri',
+            temperature=0.0,
+        )
+        if isinstance(repaired, dict):
+            result = repaired
+    
+    if not isinstance(result, dict):
+        logger.error("verify_answer JSON parse hatası, fallback (draft) kullanılıyor")
         logger.error(f"LLM response: {response[:500]}")
         # Fallback: draft'ı aynen döndür
         result = draft_final_answer
@@ -1962,7 +2068,9 @@ def format_legal_output(verified_answer: Dict[str, Any], question: str) -> str:
         citation = case.get("citation", "")
         key_role = case.get("key_role", "")
         url = case.get("url") or case.get("view_url") or ""
-        output_lines.append(f"• {citation}")
+        bucket = case.get("bucket")
+        bucket_tag = f" [{bucket}]" if bucket else ""
+        output_lines.append(f"• {citation}{bucket_tag}")
         if url:
             output_lines.append(f"  Link: {url}")
         output_lines.append(f"  Rolü: {key_role}")
@@ -1994,6 +2102,7 @@ def run_llm_pipeline(
     limit: int = 100,
     years_back: Optional[int] = 15,
     sources: Optional[List[str]] = None,
+    output_base_dir: str = "tests/docs",
 ) -> Dict[str, Any]:
     """LLM pipeline: Soru -> Anahtar kelime -> Arama -> Analiz adımlarını yürütür."""
     
@@ -2135,7 +2244,7 @@ def run_llm_pipeline(
     # Arama
     source_list = sources or DEFAULT_SOURCES
     all_docs_meta: List[Dict[str, Any]] = []
-    metadata_limit = max(limit * 2, 50)
+    metadata_limit = min(max(limit * 2, 50), 120)
     t0 = time.time()
     
     # Strict bucket araması (metadata)
@@ -2227,8 +2336,11 @@ def run_llm_pipeline(
     
     all_docs_meta = dedup_documents(all_docs_meta)
     meta_count = len(all_docs_meta)
+    if meta_count > metadata_limit:
+        all_docs_meta = all_docs_meta[:metadata_limit]
+        meta_count = len(all_docs_meta)
 
-    TARGET_MIN_META = int(os.environ.get("TARGET_MIN_META", "120"))
+    TARGET_MIN_META = int(os.environ.get("TARGET_MIN_META", "80"))
     kira_domain_flag = _has_kira_domain(keyword_objects)
     if meta_count < TARGET_MIN_META and kira_domain_flag:
         safe_print(f"\n🔎 Recall probe: meta {meta_count} < {TARGET_MIN_META}, tek-terimli fallbacklar koşuluyor (kira domain).")
@@ -2302,6 +2414,9 @@ def run_llm_pipeline(
                 all_docs_meta.extend(docs)
         all_docs_meta = dedup_documents(all_docs_meta)
         meta_count = len(all_docs_meta)
+        if meta_count > metadata_limit:
+            all_docs_meta = all_docs_meta[:metadata_limit]
+            meta_count = len(all_docs_meta)
         if not all_docs_meta:
             safe_print("\n🛑 HATA: Hiç karar bulunamadı (metadata).")
             return {"error": "Sonuç yok"}
@@ -2314,7 +2429,7 @@ def run_llm_pipeline(
         all_docs_meta = rerank_docs(question, all_docs_meta, top_n=min(RERANK_TOP_N, len(all_docs_meta)))
     
     # Tam metin zenginleştirme (en fazla limit*2 veya 40)
-    fulltext_limit = min(len(all_docs_meta), max(limit * 2, 40))
+    fulltext_limit = min(len(all_docs_meta), max(limit * 2, 60), 120)
     safe_print(f"\n📄 Tam metin zenginleştirme: ilk {fulltext_limit} karar çekiliyor...")
     all_docs_full = enrich_full_texts(all_docs_meta, limit=fulltext_limit, max_workers=None)
     
@@ -2338,7 +2453,7 @@ def run_llm_pipeline(
     safe_print(f"\n📄 Karar Seçimi: {len(focus_docs)} focus, {len(strict_docs)} strict, {len(broad_docs)} broad")
     
     # Focus'u garantiye al, ardından strict ve broad karışımı
-    selected_docs = (focus_docs[:12] + strict_docs[:12] + broad_docs[:6])[:30]
+    selected_docs = (focus_docs[:10] + strict_docs[:10] + broad_docs[:5])[:25]
     safe_print(f"   [OK] {len(selected_docs)} karar parse edilecek (rerank sirasi korunuyor)")
     
     parsed_decisions = []
@@ -2398,11 +2513,73 @@ def run_llm_pipeline(
             safe_print(f"   ℹ️ Verdict kartlardan hesaplandı: {computed_verdict}")
             verified_answer["verdict"] = computed_verdict
     
-    # Link alanlarŽñnŽñ deterministik olarak ekle
+    # Kira/TBK 344 domaininde deterministik sınır notu ve verdict koruması
+    kira_domain = _has_kira_domain(keyword_objects)
+    if kira_domain:
+        # TÜFE/TBK sinyali içeren kartlar var mı?
+        tufe_cards = []
+        for c in decision_cards:
+            blob = " ".join(
+                [
+                    c.get("facts_short", ""),
+                    c.get("reasoning_short", ""),
+                    " ".join(c.get("key_points", [])),
+                ]
+            )
+            if _has_tufe_signal(blob):
+                tufe_cards.append(c)
+        if verified_answer.get("verdict") == "uygulanabilir" and not tufe_cards:
+            verified_answer["verdict"] = "belirsiz"
+            verified_answer.setdefault("reasoning", []).append({
+                "text": "TBK 344/TÜFE sinyali bulunmadığı için kira artışı üst sınırı doğrulanamadı.",
+                "supporting_cases": []
+            })
+        # Mutlaka TÜFE üst sınır notu ekle
+        verified_answer.setdefault("reasoning", []).insert(0, {
+            "text": "TBK 344 gereği kira artışı 12 aylık TÜFE ortalamasını aşamaz; bu oranı aşan artışlar sözleşme olsa dahi sınırlıdır.",
+            "supporting_cases": [c.get("id") for c in tufe_cards[:2] if c.get("id")] if tufe_cards else []
+        })
+        # Soruda belirtilen yüzde talebi varsa ve yüksekse verdict'i temkinli yap
+        percents = _extract_percent_values(question or "")
+        if percents:
+            max_pct = max(percents)
+            if max_pct >= 50 and verified_answer.get("verdict") == "uygulanabilir":
+                verified_answer["verdict"] = "belirsiz"
+                verified_answer.setdefault("reasoning", []).append({
+                    "text": f"Soruda talep edilen %{max_pct} artış, TBK 344 kapsamındaki 12 aylık TÜFE ortalaması sınırını aşabilir; bu nedenle olumlu görüş belirsiz olarak güncellendi.",
+                    "supporting_cases": [c.get("id") for c in tufe_cards[:2] if c.get("id")] if tufe_cards else []
+                })
+    
+    # Link alanlarını deterministik olarak ekle
     id2url = {c.get("id"): c.get("view_url") or c.get("url") for c in decision_cards if c.get("id")}
     for cu in verified_answer.get("cases_used", []):
         if cu.get("id") and not cu.get("url") and id2url.get(cu["id"]):
             cu["url"] = id2url[cu["id"]]
+
+    # Dayanak kartları minimum 4 olacak şekilde tamamla (öncelik focus > strict > broad)
+    cases_used = verified_answer.get("cases_used") or []
+    if len(cases_used) < 4:
+        # id seti
+        used_ids = {c.get("id") for c in cases_used if c.get("id")}
+        ordered_cards = sorted(
+            decision_cards,
+            key=lambda c: {"focus": 0, "strict": 1, "broad": 2}.get(c.get("bucket"), 3)
+        )
+        for c in ordered_cards:
+            cid = c.get("id")
+            if not cid or cid in used_ids:
+                continue
+            cases_used.append({
+                "id": cid,
+                "citation": c.get("citation", ""),
+                "key_role": c.get("reasoning_short", "")[:200] or "Soru ile ilgili emsal",
+                "view_url": c.get("view_url"),
+                "bucket": c.get("bucket")
+            })
+            used_ids.add(cid)
+            if len(cases_used) >= 4:
+                break
+        verified_answer["cases_used"] = cases_used
     
     # Madde 8: Format output
     duration = time.time() - t0
@@ -2411,7 +2588,7 @@ def run_llm_pipeline(
     formatted_output = format_legal_output(verified_answer, question)
     
     # Dosyalara kaydet
-    run_dir = _create_run_directory("tests/docs")
+    run_dir = _create_run_directory(output_base_dir)
     
     # Decision cards'ı kaydet (NDJSON)
     cards_path = run_dir / "decision_cards.ndjson"
@@ -2468,7 +2645,7 @@ def load_test_scenarios(test_file: str = "tests/legal_scenarios.json") -> List[D
 
 def run_tests(test_file: str = "tests/legal_scenarios.json", 
               output_dir: str = "outputs/tests/") -> None:
-    """Tüm test senaryolarını çalıştırır ve sonuçları kaydeder."""
+    """Tüm test senaryolarını çalıştırır ve çıktıları verilen klasöre yazar."""
     scenarios = load_test_scenarios(test_file)
     
     if not scenarios:
@@ -2489,12 +2666,24 @@ def run_tests(test_file: str = "tests/legal_scenarios.json",
         
         safe_print(f"Test {i}/{len(scenarios)}: {question[:50]}...")
         
+        # Beklenti yoksa çalıştırıp gereksiz dosya üretmeyelim
+        if not expected_verdict and not expected_cases:
+            results.append({
+                "test_id": i,
+                "question": question,
+                "status": "SKIP",
+                "reason": "Beklenen karar/verdict tanımlı değil"
+            })
+            safe_print("   ⏭️ SKIP")
+            continue
+        
         try:
             result = run_llm_pipeline(
                 question=question,
                 limit=50,
                 years_back=15,
-                sources=DEFAULT_SOURCES
+                sources=DEFAULT_SOURCES,
+                output_base_dir=output_dir,
             )
             
             actual_verdict = result.get("verified_answer", {}).get("verdict", "")
@@ -2539,6 +2728,7 @@ def run_tests(test_file: str = "tests/legal_scenarios.json",
     passed = sum(1 for r in results if r.get("status") == "PASS")
     failed = sum(1 for r in results if r.get("status") == "FAIL")
     errors = sum(1 for r in results if r.get("status") == "ERROR")
+    skipped = sum(1 for r in results if r.get("status") == "SKIP")
     
     safe_print("\n" + "=" * 70)
     safe_print("TEST SONUÇLARI")
@@ -2547,6 +2737,7 @@ def run_tests(test_file: str = "tests/legal_scenarios.json",
     safe_print(f"Başarılı: {passed}")
     safe_print(f"Başarısız: {failed}")
     safe_print(f"Hata: {errors}")
+    safe_print(f"Atlanan: {skipped}")
     safe_print(f"\nSonuçlar kaydedildi: {results_file}")
     safe_print("=" * 70)
 

@@ -1,0 +1,26 @@
+{
+  "verdict": "uygulanabilir",
+  "reasoning": [
+    {
+      "text": "Kararlara göre, kira artışları genellikle TÜFE veya yazılı sözleşme şartlarına dayanır. Ancak belirli bir zam oranını doğrudan yasal sınırlama olmamaktadır ve belirgin çevre koşulları nedeniyle uyarlama talebi yapılabilir. Bu durumda, %100 kira artışının yasallığını doğrulayan veya reddeden açık bir hüküm bulunmamaktadır.",
+      "supporting_cases": [
+        "126005400",
+        "209885700"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "126005400",
+      "citation": "Yargıtay 6. Hukuk Dairesi, 08.10.2015, 2014/10127 E., 2015/8156 K.",
+      "key_role": "Kira artış oranının genellikle TÜFE'ye dayandığı ve belirgin çevre koşullarında uyarlama talebi yapılabilme konusunda bilgi veren karar.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/126005400?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22T%C3%9CFE%22"
+    },
+    {
+      "id": "209885700",
+      "citation": "Yargıtay 6. Hukuk Dairesi, 16.03.2016, 2015/6889 E., 2016/2051 K.",
+      "key_role": "Kira artışının yazılı sözleşme şartlarına dayandığı ve TÜFE'ye göre artırılması gerektiği konusunda bilgi veren karar.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/209885700?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22T%C3%9CFE%22"
+    }
+  ]
+}

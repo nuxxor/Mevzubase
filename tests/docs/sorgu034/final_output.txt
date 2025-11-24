@@ -1,0 +1,30 @@
+======================================================================
+SONUÇ
+======================================================================
+Soru: Bir dükkan kiraladım 3 yıl önce sözleşme yapmıştık (1 yıllık, her sene yeni sözleşme yapıyoruz) bu s...
+
+Somut olayda mevcut kararlara göre sorudaki hukuki sonuç olumlu görünmektedir.
+
+======================================================================
+GEREKÇE
+======================================================================
+1. Kararlara göre, kira artışları genellikle TÜFE veya yazılı sözleşme şartlarına dayanır. Ancak belirli bir zam oranını doğrudan yasal sınırlama olmamaktadır ve belirgin çevre koşulları nedeniyle uyarlama talebi yapılabilir. Bu durumda, %100 kira artışının yasallığını doğrulayan veya reddeden açık bir hüküm bulunmamaktadır.
+   Dayanak: 126005400, 209885700
+
+======================================================================
+DAYANAK KARARLAR
+======================================================================
+• Yargıtay 6. Hukuk Dairesi, 08.10.2015, 2014/10127 E., 2015/8156 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/126005400?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22T%C3%9CFE%22
+  Rolü: Kira artış oranının genellikle TÜFE'ye dayandığı ve belirgin çevre koşullarında uyarlama talebi yapılabilme konusunda bilgi veren karar.
+
+• Yargıtay 6. Hukuk Dairesi, 16.03.2016, 2015/6889 E., 2016/2051 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/209885700?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22T%C3%9CFE%22
+  Rolü: Kira artışının yazılı sözleşme şartlarına dayandığı ve TÜFE'ye göre artırılması gerektiği konusunda bilgi veren karar.
+
+======================================================================
+NOTLAR / SINIRLAR
+======================================================================
+Bu soruya en yakın görülen kararlar esas alınmıştır.
+Somut olayın tüm detaylarına göre değerlendirme yapılması önerilir.
+======================================================================

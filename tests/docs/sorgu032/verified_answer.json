@@ -1,0 +1,26 @@
+{
+  "verdict": "uygulanabilir",
+  "reasoning": [
+    {
+      "text": "Kira artış oranları genellikle TÜFE veya TEFE gibi endüstriyel indekslere dayalı olarak belirlenmektedir. Ancak, belirli çevre koşulları nedeniyle kira tutarında uyarlama talebi de mümkündür. Bu durumda, yasada belirtilmiş bir maksimum artış oranı bulunmamaktadır; bu oran genellikle sözleşmede veya mevcut ekonomik koşullara göre belirlenmektedir.",
+      "supporting_cases": [
+        "126005400",
+        "209885700"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "126005400",
+      "citation": "Yargıtay 6. Hukuk Dairesi, 08.10.2015, 2014/10127 E., 2015/8156 K.",
+      "key_role": "Kira artış oranının genellikle TÜFE'ye dayalı olarak belirlenmesi ve çevre koşulları nedeniyle uyarlama talebinin mümkün olması",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/126005400?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22T%C3%9CFE%22"
+    },
+    {
+      "id": "209885700",
+      "citation": "Yargıtay 6. Hukuk Dairesi, 16.03.2016, 2015/6889 E., 2016/2051 K.",
+      "key_role": "Kira artışlarının her yıl yapılması ve genel olarak belirlenen endüstriyel indekslere dayalı olma özelliği",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/209885700?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22T%C3%9CFE%22"
+    }
+  ]
+}

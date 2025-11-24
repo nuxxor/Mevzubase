@@ -1,0 +1,26 @@
+{
+  "verdict": "uygulanabilir",
+  "reasoning": [
+    {
+      "text": "Hakaret nedeniyle kişilik haklarının ihlal edildiği durumlarda manevi tazminat taleplerinin kabul edilebileceği görülmektedir. Ancak, diğer tarafın da hakaret ettiği durumlarında davanın reddine karar verilmesi de mümkün olmaktadır.",
+      "supporting_cases": [
+        "265061000",
+        "451095400"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "265061000",
+      "citation": "Yargıtay 4. Hukuk Dairesi, 28.10.2013, 2013/14271 E., 2013/16474 K.",
+      "key_role": "Hakaret nedeniyle kişilik haklarının ihlal edildiği durumda manevi tazminat taleplerinin reddine karar verilmesi",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/265061000?query=%2B%22hakaret%22%20%2B%22manevi%20tazminat%22"
+    },
+    {
+      "id": "451095400",
+      "citation": "Yargıtay 4. Hukuk Dairesi, 26.09.2018, 2016/8578 E., 2018/5681 K.",
+      "key_role": "Hakaret ve tehdit eylemleri sebebiyle manevi tazminat taleplerinin kısmen kabulüne karar verilmesi",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/451095400?query=%2B%22hakaret%22%20%2B%22manevi%20tazminat%22"
+    }
+  ]
+}
