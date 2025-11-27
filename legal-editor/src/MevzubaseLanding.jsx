@@ -853,7 +853,9 @@ const LandingPage = ({ onNavigate, isLoaded }) => {
               alignItems: 'center',
               gap: '8px',
               marginBottom: '14px',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              position: 'relative',
+              zIndex: 10
             }}>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'nowrap' }}>
                 {personaLabels.map(p => (
