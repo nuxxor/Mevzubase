@@ -16,6 +16,7 @@ import argparse
 import json
 from pathlib import Path
 from typing import Dict, Iterable, List, Sequence, Tuple
+from uuid import NAMESPACE_URL, UUID, uuid5
 
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as qm
@@ -132,9 +133,18 @@ def upsert_batch(
     vectors: Sequence[Sequence[float]],
     payloads: Sequence[Dict],
 ) -> None:
+    def _as_uuid(point_id: str | int) -> str | int:
+        # Qdrant on this setup only accepts int or UUID IDs; map string IDs to stable UUID5.
+        if isinstance(point_id, int):
+            return point_id
+        try:
+            return str(UUID(str(point_id)))
+        except Exception:
+            return str(uuid5(NAMESPACE_URL, str(point_id)))
+
     points = [
         qm.PointStruct(
-            id=pid,
+            id=_as_uuid(pid),
             vector=vec,
             payload=payload,
         )

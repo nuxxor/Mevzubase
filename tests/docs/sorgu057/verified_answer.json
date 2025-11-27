@@ -1,0 +1,39 @@
+{
+  "verdict": "uygulanabilir",
+  "reasoning": [
+    {
+      "text": "Kural kartı referansı (card_id: 3) ve karar id'leri ile, ayıp ihbarının yapıldığı her türlü delille ispat edilebilir ve ihbarın yapılması gereken makul süre belirlenmelidir. Bu kural, satım sözleşmesi bağlamında ayıp ihbarı süresinin önemini vurgular. İhbar süresinde yapılan bir ayıp ihbarının delilleri ile ispat edilebilir durumda olduğu görülmektedir.",
+      "supporting_cases": [
+        "1061075100",
+        "1042398100"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "1061075100",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 24.04.2024, 2023/2469 E., 2024/1366 K.",
+      "key_role": "Ayıp ihbarının süresinde yapılması gerektiği ve delillerle ispat edilebilir olması",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/1061075100?query=%2B%22ekspertiz%22%20%2B%22sat%C4%B1m%20s%C3%B6zle%C5%9Fmesi%22"
+    },
+    {
+      "id": "1042398100",
+      "citation": "Yargıtay 5. Hukuk Dairesi, 16.07.2020, 2020/101 E., 2020/101 K.",
+      "key_role": "Ayıp ihbarının süresinde yapılması gerektiği ve delillerle ispat edilebilir olması"
+    },
+    {
+      "id": "930039900",
+      "citation": "Yargıtay İstanbul Bölge Adliye Mahkemesi 13. Hukuk Dairesi, 14.09.2023, 2021/747 E., 2023/1279 K.",
+      "key_role": "Karar, ayıbın hemen bildirilmesi gerektiği konusunda vurgu yapmaktadır. Ancak, ağır kusur durumunda ayıp ihbarında bulunma zorunluluğu olmamaktadır.",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/930039900?query=%2B%22ay%C4%B1p%20ihbar%C4%B1%22%20%2B%22ekspertiz%22%20%2B%22sat%C4%B1m%20s%C3%B6zle%C5%9Fmesi%22",
+      "bucket": "strict"
+    },
+    {
+      "id": "1095131500",
+      "citation": "Yargıtay İstanbul Bölge Adliye Mahkemesi 12. Hukuk Dairesi, 04.12.2024, 2022/781 E., 2024/1763 K.",
+      "key_role": "Karar, alıcının malın ayıplı olduğu durumunda satıcıya ihbar etme yükümlülüğüne ve bu ihbartaki sürelerine dikkat çekmektedir.",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/1095131500?query=%2B%22ay%C4%B1p%20ihbar%C4%B1%22%20%2B%22ekspertiz%22%20%2B%22sat%C4%B1m%20s%C3%B6zle%C5%9Fmesi%22",
+      "bucket": "strict"
+    }
+  ]
+}

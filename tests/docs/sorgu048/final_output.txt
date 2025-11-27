@@ -1,0 +1,38 @@
+======================================================================
+SONUÇ
+======================================================================
+Soru: Boşanma davasında nafaka hesabında TÜFE nasıl uygulanır?
+
+Somut olayda mevcut kararlara göre sorudaki hukuki sonuç olumlu görünmektedir.
+
+======================================================================
+GEREKÇE
+======================================================================
+1. Yargıtay kararlarında nafakanın takdirinde TÜİK'in yayınladığı ÜFE oranının kullanılması gerektiği açıkça belirtilmiştir. Bu, yoksulluk nafakasının TÜFE oranına göre artırılması gerektiğini göstermektedir.
+   Dayanak: 390905100, 355559900
+
+======================================================================
+DAYANAK KARARLAR
+======================================================================
+• Yargıtay 3. Hukuk Dairesi, 12.10.2017, 2017/12590 E., 2017/13907 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/390905100?query=%2B%22TMK%20175%22%20%2B%22T%C3%9CFE%22
+  Rolü: yoksulluk nafakası TÜFE oranında artırılması gerektiği konusunda destek
+
+• Yargıtay 3. Hukuk Dairesi, 08.06.2017, 2016/20676 E., 2017/9516 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/355559900?query=%2B%22TMK%20175%22%20%2B%22T%C3%9CFE%22
+  Rolü: yoksulluk nafakası TÜFE oranında artırılması gerektiği konusunda destek
+
+• Yargıtay 3. Hukuk Dairesi, 01.03.2017, 2016/12499 E., 2017/2280 K. [broad]
+  Link: https://mevzuat.adalet.gov.tr/ictihat/321398700?query=%2B%22TMK%20175%22%20%2B%22T%C3%9CFE%22
+  Rolü: Kararda, TÜFE oranında artış yapılması gerektiği belirtilmiştir. Bu, soruda sorgulanan nafakanın TÜFE'ye göre artırılması gerektiğini göstermektedir.
+
+• Yargıtay 3. Hukuk Dairesi, 19.10.2017, 2017/12881 E., 2017/14253 K. [broad]
+  Link: https://mevzuat.adalet.gov.tr/ictihat/391141000?query=%2B%22TMK%20175%22%20%2B%22T%C3%9CFE%22
+  Rolü: Kararda, davacı'nın Tüfe oranlarına dayalı olarak nafakanın artırılması talebinin yer aldığı açıkça belirtilmiştir.
+
+======================================================================
+NOTLAR / SINIRLAR
+======================================================================
+Bu soruya en yakın görülen kararlar esas alınmıştır.
+Somut olayın tüm detaylarına göre değerlendirme yapılması önerilir.
+======================================================================

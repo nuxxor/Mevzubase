@@ -30,6 +30,7 @@ SECTION_PATTERN = re.compile(
 
 SOFT_TOKEN_TARGET = 600
 HARD_TOKEN_LIMIT = 850
+OVERLAP_TOKENS = 50
 
 
 @dataclass
@@ -91,15 +92,15 @@ def chunk_sections(doc: CanonDoc, sections: Sequence[Section]) -> list[Chunk]:
             if token_total and token_total + tokens > HARD_TOKEN_LIMIT:
                 chunks.append(_emit_chunk(doc, anchor, section.title, buffer, chunk_index))
                 chunk_index += 1
-                buffer = []
-                token_total = 0
+                buffer = _tail_lines(buffer, OVERLAP_TOKENS)
+                token_total = sum(approx_tokens(l) for l in buffer)
             buffer.append(para)
             token_total += tokens
             if token_total >= SOFT_TOKEN_TARGET:
                 chunks.append(_emit_chunk(doc, anchor, section.title, buffer, chunk_index))
                 chunk_index += 1
-                buffer = []
-                token_total = 0
+                buffer = _tail_lines(buffer, OVERLAP_TOKENS)
+                token_total = sum(approx_tokens(l) for l in buffer)
         if buffer:
             chunks.append(_emit_chunk(doc, anchor, section.title, buffer, chunk_index))
     return chunks
@@ -111,6 +112,23 @@ def _emit_chunk(doc: CanonDoc, anchor: str, section_title: str, lines: list[str]
         return make_chunk(anchor, doc, None, section_title)
     chunk_text = "\n".join([anchor, f"[{section_title}]", body]).strip()
     return make_chunk(chunk_text, doc, None, f"{section_title}:{idx}")
+
+
+def _tail_lines(lines: list[str], budget_tokens: int) -> list[str]:
+    """Son kısımdan budget_tokens kadarını bırakır (overlap için)."""
+    if not lines or budget_tokens <= 0:
+        return []
+    tail: list[str] = []
+    used = 0
+    for line in reversed(lines):
+        t = approx_tokens(line)
+        if used + t > budget_tokens and tail:
+            break
+        tail.append(line)
+        used += t
+        if used >= budget_tokens:
+            break
+    return list(reversed(tail))
 
 
 def _iter_paragraphs(text: str) -> Iterable[str]:

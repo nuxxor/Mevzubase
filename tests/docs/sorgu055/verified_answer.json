@@ -1,0 +1,40 @@
+{
+  "verdict": "uygulanabilir",
+  "reasoning": [
+    {
+      "text": "Ayıp ihbarının yapıldığı her türlü delille ispat edilebilir ve ihbarın yapılması gereken makul süre belirlenmelidir. Bu durumda, ayıp ihbarı süresi içinde yapılmalıdır ve bu süre genellikle yasal olarak belirlenmiştir.",
+      "supporting_cases": [
+        "1061075100",
+        "212070300"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "1061075100",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 24.04.2024, 2023/2469 E., 2024/1366 K.",
+      "key_role": "Ayıp ihbarının yasal süresinde yapılması gerektiği konusunda genel bir bilgi vermektedir.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/1061075100?query=%2B%22ekspertiz%22%20%2B%22sat%C4%B1m%20s%C3%B6zle%C5%9Fmesi%22"
+    },
+    {
+      "id": "212070300",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 15.06.2023, 2023/1458 E., 2023/987 K.",
+      "key_role": "Ayıp ihbarının süresinde yapılması gerektiği konusunda genel bir bilgi vermektedir.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/212070300?query=%2B%22ay%C4%B1p%20ihbar%C4%B1%22%20%2B%22sat%C4%B1m%20s%C3%B6zle%C5%9Fmesi%22"
+    },
+    {
+      "id": "930039900",
+      "citation": "Yargıtay İstanbul Bölge Adliye Mahkemesi 13. Hukuk Dairesi, 14.09.2023, 2021/747 E., 2023/1279 K.",
+      "key_role": "Karar, ayıbın hemen bildirilmesi gerektiğini belirtmektedir. Ancak ağır kusur durumunda ayıp ihbarında bulunma zorunluluğu olmamaktadır.",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/930039900?query=%2B%22ay%C4%B1p%20ihbar%C4%B1%22%20%2B%22ekspertiz%22%20%2B%22sat%C4%B1m%20s%C3%B6zle%C5%9Fmesi%22",
+      "bucket": "strict"
+    },
+    {
+      "id": "1095131500",
+      "citation": "Yargıtay İstanbul Bölge Adliye Mahkemesi 12. Hukuk Dairesi, 04.12.2024, 2022/781 E., 2024/1763 K.",
+      "key_role": "Karar, alıcının malın ayıplı olduğu durumunda satıcıya ihbar etme yükümlülüğüne ve bu ihbartaki sürelerine dikkat çekmektedir. Ekspertiz raporunun da bahsedilmesi, soruya ilişkin önemli bilgilerin var",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/1095131500?query=%2B%22ay%C4%B1p%20ihbar%C4%B1%22%20%2B%22ekspertiz%22%20%2B%22sat%C4%B1m%20s%C3%B6zle%C5%9Fmesi%22",
+      "bucket": "strict"
+    }
+  ]
+}

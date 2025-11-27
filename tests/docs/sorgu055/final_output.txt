@@ -1,0 +1,38 @@
+======================================================================
+SONUÇ
+======================================================================
+Soru: satım sözleşmesinde ayıp ihbarı ve ekspertiz ne zaman yapılmalı?
+
+Somut olayda mevcut kararlara göre sorudaki hukuki sonuç olumlu görünmektedir.
+
+======================================================================
+GEREKÇE
+======================================================================
+1. Ayıp ihbarının yapıldığı her türlü delille ispat edilebilir ve ihbarın yapılması gereken makul süre belirlenmelidir. Bu durumda, ayıp ihbarı süresi içinde yapılmalıdır ve bu süre genellikle yasal olarak belirlenmiştir.
+   Dayanak: 1061075100, 212070300
+
+======================================================================
+DAYANAK KARARLAR
+======================================================================
+• Yargıtay 3. Hukuk Dairesi, 24.04.2024, 2023/2469 E., 2024/1366 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/1061075100?query=%2B%22ekspertiz%22%20%2B%22sat%C4%B1m%20s%C3%B6zle%C5%9Fmesi%22
+  Rolü: Ayıp ihbarının yasal süresinde yapılması gerektiği konusunda genel bir bilgi vermektedir.
+
+• Yargıtay 3. Hukuk Dairesi, 15.06.2023, 2023/1458 E., 2023/987 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/212070300?query=%2B%22ay%C4%B1p%20ihbar%C4%B1%22%20%2B%22sat%C4%B1m%20s%C3%B6zle%C5%9Fmesi%22
+  Rolü: Ayıp ihbarının süresinde yapılması gerektiği konusunda genel bir bilgi vermektedir.
+
+• Yargıtay İstanbul Bölge Adliye Mahkemesi 13. Hukuk Dairesi, 14.09.2023, 2021/747 E., 2023/1279 K. [strict]
+  Link: https://mevzuat.adalet.gov.tr/ictihat/930039900?query=%2B%22ay%C4%B1p%20ihbar%C4%B1%22%20%2B%22ekspertiz%22%20%2B%22sat%C4%B1m%20s%C3%B6zle%C5%9Fmesi%22
+  Rolü: Karar, ayıbın hemen bildirilmesi gerektiğini belirtmektedir. Ancak ağır kusur durumunda ayıp ihbarında bulunma zorunluluğu olmamaktadır.
+
+• Yargıtay İstanbul Bölge Adliye Mahkemesi 12. Hukuk Dairesi, 04.12.2024, 2022/781 E., 2024/1763 K. [strict]
+  Link: https://mevzuat.adalet.gov.tr/ictihat/1095131500?query=%2B%22ay%C4%B1p%20ihbar%C4%B1%22%20%2B%22ekspertiz%22%20%2B%22sat%C4%B1m%20s%C3%B6zle%C5%9Fmesi%22
+  Rolü: Karar, alıcının malın ayıplı olduğu durumunda satıcıya ihbar etme yükümlülüğüne ve bu ihbartaki sürelerine dikkat çekmektedir. Ekspertiz raporunun da bahsedilmesi, soruya ilişkin önemli bilgilerin var
+
+======================================================================
+NOTLAR / SINIRLAR
+======================================================================
+Bu soruya en yakın görülen kararlar esas alınmıştır.
+Somut olayın tüm detaylarına göre değerlendirme yapılması önerilir.
+======================================================================

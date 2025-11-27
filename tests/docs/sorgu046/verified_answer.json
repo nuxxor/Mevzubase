@@ -1,0 +1,40 @@
+{
+  "verdict": "uygulanabilir",
+  "reasoning": [
+    {
+      "text": "Yargıtay kararlarına göre, hakaret ve aşağılamanın onur kırıcı davranışlar kapsamında değerlendirildiği görülmektedir. Bu durum, Türk Medeni Kanunu'nun 162. maddesinde belirtilen pek kötü veya onur kırıcı davranış sebebiyle boşanma kararı alımına olanak tanımaktadır.",
+      "supporting_cases": [
+        "82557500",
+        "210431700"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "82557500",
+      "citation": "Yargıtay 2. Hukuk Dairesi, 24.09.2012, 2012/4316 E., 2012/22373 K.",
+      "key_role": "hakaret ve aşağılamanın iftira boyutuna varması gerektiği belirtilmiştir.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/82557500?query=2.%20%2B%22hakaret%22%20%2B%22onur%20k%C4%B1r%C4%B1c%C4%B1%22"
+    },
+    {
+      "id": "210431700",
+      "citation": "Yargıtay 2. Hukuk Dairesi, 07.03.2016, 2015/14215 E., 2016/4389 K.",
+      "key_role": "davalı erkeğin eşine hakaret ettiği gerekçesiyle boşanma kararı verilmiştir.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/210431700?query=2.%20%2B%22hakaret%22%20%2B%22onur%20k%C4%B1r%C4%B1c%C4%B1%22"
+    },
+    {
+      "id": "366790000",
+      "citation": "Yargıtay 18. Ceza Dairesi, 19.09.2017, 2015/39672 E., 2017/9142 K.",
+      "key_role": "Tutanaklar ve belgeler sanığın 'şerefsiz' sözüyle hakarete bulunduğunu gösteriyor.",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/366790000?query=%2B%22hakaret%22%20%2B%22%C5%9Ferefsiz%22",
+      "bucket": "strict"
+    },
+    {
+      "id": "438272400",
+      "citation": "Yargıtay 18. Ceza Dairesi, 05.07.2018, 2016/5992 E., 2018/10889 K.",
+      "key_role": "Sanığın 'şerefsiz' dediğini ikrar etmesine rağmen beraat kararı verilmesi kanuna aykırı olarak değerlendirildi.",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/438272400?query=%2B%22hakaret%22%20%2B%22%C5%9Ferefsiz%22",
+      "bucket": "strict"
+    }
+  ]
+}

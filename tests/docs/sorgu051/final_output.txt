@@ -1,0 +1,41 @@
+======================================================================
+SONUÇ
+======================================================================
+Soru: İcra takibinde borçluya usulsüz tebligat yapılırsa sonuçları nelerdir?
+
+Somut olayda mevcut kararlara göre sorudaki hukuki sonuç olumlu görünmektedir.
+
+======================================================================
+GEREKÇE
+======================================================================
+1. Borçluya usulsüz tebligat yapıldığında, haksız bir icra takibine yol açabileceği ve bu durumda kötüniyet tazminatına da başvurulabileceği görülmektedir.
+   Dayanak: 813358800, 378380000
+
+2. Usulsüz tebligatta bulunulduğunda, icra takibinin iptali talep edilebilir ve bu durumda mahkeme davanın reddine karar verebilir.
+   Dayanak: 813358800, 378380000
+
+======================================================================
+DAYANAK KARARLAR
+======================================================================
+• Yargıtay 19. Hukuk Dairesi, 13.09.2011, 2011/396 E., 2011/10704 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/813358800?query=%2B%22takipsizlik%22%20%2B%22icra%20takibi%22
+  Rolü: icra takibinde usulsüz tebligatın kötüniyet tazminatına yol açabileceği
+
+• Yargıtay 19. Hukuk Dairesi, 15.05.2014, 2014/5632 E., 2014/9283 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/378380000?query=%2B%22takipsizlik%22%20%2B%22icra%20takibi%22
+  Rolü: usulsüz tebligatta bulunulduğunda haksız icra takibine yol açabileceği
+
+• Yargıtay 12. Hukuk Dairesi, 15.09.2015, 2015/10052 E., 2015/21175 K. [strict]
+  Link: https://mevzuat.adalet.gov.tr/ictihat/174086500?query=%2B%22takipsizlik%22%20%2B%22icra%20takibi%22
+  Rolü: Borçluya usulsüz tebligat yapıldığı için, borçlu işlemi iptal etme talebinde bulunmuş ancak mahkemece istemin reddine karar verilmiştir.
+
+• Yargıtay 19. Hukuk Dairesi, 07.10.2013, 2012/17389 E., 2013/15498 K. [strict]
+  Link: https://mevzuat.adalet.gov.tr/ictihat/489688500?query=%2B%22takipsizlik%22%20%2B%22icra%20takibi%22
+  Rolü: Kararda usulsüz tebligatin sonuçları belirtilmiştir, ancak doğrudan borçluya usulsüz tebligatın sonuçlarını detaylıyor olmamaktadır. Ancak, genel olarak usulsüz tebligatın duruşmanın gerçekleşmemesine
+
+======================================================================
+NOTLAR / SINIRLAR
+======================================================================
+Bu soruya en yakın görülen kararlar esas alınmıştır.
+Somut olayın tüm detaylarına göre değerlendirme yapılması önerilir.
+======================================================================

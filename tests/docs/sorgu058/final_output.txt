@@ -1,0 +1,40 @@
+======================================================================
+SONUÇ
+======================================================================
+Soru: kira artış oranı TBK 344 tufe sınırı nedir?
+
+Somut olayda mevcut kararlara göre sorudaki hukuki sonuç olumlu görünmektedir.
+
+======================================================================
+GEREKÇE
+======================================================================
+1. TBK 344 gereği kira artışı 12 aylık TÜFE ortalamasını aşamaz; bu oranı aşan artışlar sözleşme olsa dahi sınırlıdır.
+   Dayanak: 467708800, 1158814600
+
+2. TBK 344 maddesi, kira artış oranının TÜFE endeks verilerine dayandığını belirtmektedir. Ancak spesifik bir sınır değeri belirtilmemiştir (card_id: 8). Bu durumda, kira artışoranı TÜFE endeksi üzerinden hesaplanmalıdır ve bu konuda spesifik bir sınır bulunmamaktadır. Kural kartı ve kararlar, sözleşme yapımında tarafların belirlediği artış oranına ahde-vefa ilkesine uygun olarak bağlı kalınması gerektiğini vurguluyor (card_id: 8).
+   Dayanak: 514766300, 529744200
+
+======================================================================
+DAYANAK KARARLAR
+======================================================================
+• Yargıtay 3. Hukuk Dairesi, 13.06.2019, 2017/8272 E., 2019/5399 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/514766300?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22T%C3%9CFE%22
+  Rolü: kira artışoranının TÜFE endeksi üzerinden hesaplandığı ifadesini içerir
+
+• Yargıtay 3. Hukuk Dairesi, 18.06.2019, 2017/8272 E., 2019/5399 K.
+  Rolü: ahde-vefa ilkesine uygun olarak sözleşme belirtilen artış oranına bağlı kalınması gerektiğini vurgular
+
+• Yargıtay 3. Hukuk Dairesi, 17.12.2018, 2017/4927 E., 2018/12855 K. [focus]
+  Link: https://mevzuat.adalet.gov.tr/ictihat/467708800?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22TBK%20344%22
+  Rolü: Soru ile ilgili emsal
+
+• Yargıtay 3. Hukuk Dairesi, 10.06.2025, 2025/893 E., 2025/3205 K. [focus]
+  Link: https://mevzuat.adalet.gov.tr/ictihat/1158814600?query=%2B%22kira%20art%C4%B1%C5%9F%22%20%2B%22TBK%20m.344%22
+  Rolü: Kararda TBK 344 maddesi kapsamında kira artışoranına sınır getirildiği belirtilmiştir.
+
+======================================================================
+NOTLAR / SINIRLAR
+======================================================================
+Bu soruya en yakın görülen kararlar esas alınmıştır.
+Somut olayın tüm detaylarına göre değerlendirme yapılması önerilir.
+======================================================================

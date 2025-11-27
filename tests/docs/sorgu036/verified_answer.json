@@ -1,0 +1,40 @@
+{
+  "verdict": "uygulanabilir",
+  "reasoning": [
+    {
+      "text": "TCK'nin 150/1 maddesi, nitelikli yağma suçunda hukuki alacak tahsili amacıyla uygulamaya alınabilmektedir. Bu durum, çeşitli kararlar arasında açıkça belirtildi ve sanıkların cezalandırılması sırasında bu maddeye dayanılmıştır.",
+      "supporting_cases": [
+        "507173500",
+        "951574000"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "507173500",
+      "citation": "Yargıtay 1. Ceza Dairesi, 03.04.2019, 2018/5526 E., 2019/2076 K.",
+      "key_role": "Sanıklar hakkında nitelikli yağma suçundan TCK'nin 150/1 maddesi yoluyla hapis cezalarının belirlenmesi",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/507173500?query=%2B%22TCK%20150/1%22%20%2B%22nitelikli%20ya%C4%9Fma%22"
+    },
+    {
+      "id": "951574000",
+      "citation": "Yargıtay 3. Ceza Dairesi, 17.09.2013, 2012/29922 E., 2013/30832 K.",
+      "key_role": "Sanık hakkında hukuki alacağını tahsil amacıyla yağma suçundan TCK'nin 150/1 maddesi yoluyla cezalandırılması istemi ile kamu davası açılması",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/951574000?query=%2B%22TCK%20150/1%22%20%2B%22nitelikli%20ya%C4%9Fma%22"
+    },
+    {
+      "id": "441384200",
+      "citation": "Yargıtay 6. Ceza Dairesi, 20.09.2018, 2016/7486 E., 2018/5715 K.",
+      "key_role": "Kararda, sanığa yüklenen suçu belirten ve TCK 150/1 maddesiyle ilgili bir değerlendirme yapıldığı görülmektedir.",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/441384200?query=%2B%22TCK%20150/1%22%20%2B%22nitelikli%20ya%C4%9Fma%22",
+      "bucket": "strict"
+    },
+    {
+      "id": "769147500",
+      "citation": "Yargıtay 6. Ceza Dairesi, 16.05.2022, 2021/14993 E., 2022/7152 K.",
+      "key_role": "Tebliğnamede, sanık hakkında 5237 sayılı TCK’nın 150/1. maddesinin uygulanması gerektiğinden bahsedilmesi, soruya olumlu bir yanıt vermektedir.",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/769147500?query=%2B%22TCK%20150/1%22%20%2B%22nitelikli%20ya%C4%9Fma%22",
+      "bucket": "strict"
+    }
+  ]
+}

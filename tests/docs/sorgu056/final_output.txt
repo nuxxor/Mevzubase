@@ -1,0 +1,37 @@
+======================================================================
+SONUÇ
+======================================================================
+Soru: satım sözleşmesinde ayıp ihbarı ve ekspertiz ne zaman yapılmalı?
+
+Somut olayda mevcut kararlara göre sorudaki hukuki sonuç olumlu görünmektedir.
+
+======================================================================
+GEREKÇE
+======================================================================
+1. Kural kartı referansı ve karar id'leri: Kural kartları, ayıp ihbarının süresinde yapılması gerektiğini belirtmektedir. Bu durum, TTK'nın 23. maddesi ve diğer yasal mevzuatlar tarafından desteklenmektedir. Kararlar arasında, '1061075100', '1049823100' ve '212070300' id'li kararlar bu konuda önemli bilgiler içeriyor.
+   Dayanak: 1061075100, 1049823100, 212070300
+
+======================================================================
+DAYANAK KARARLAR
+======================================================================
+• Yargıtay 3. Hukuk Dairesi, 24.04.2024, 2023/2469 E., 2024/1366 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/1061075100?query=%2B%22ekspertiz%22%20%2B%22sat%C4%B1m%20s%C3%B6zle%C5%9Fmesi%22
+  Rolü: Ayıbın şirket tarafından yasal sürede bildirilmediği belirtildiği karar.
+
+• Yargıtay 1. Hukuk Dairesi, 25.07.2023, 2023/611 E., 2023/100 K.
+  Rolü: Ayıp ihbarının yapılmadığı ve ekspertizin yapılması gerektiği belirtildiği karar.
+
+• Yargıtay 3. Hukuk Dairesi, 24.04.2024, 2023/2469 E., 2024/1366 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/212070300?query=%2B%22ay%C4%B1p%20ihbar%C4%B1%22%20%2B%22sat%C4%B1m%20s%C3%B6zle%C5%9Fmesi%22
+  Rolü: Ayıp ihbarının süresinde yapılması gerektiği belirtildiği karar.
+
+• Yargıtay İstanbul Bölge Adliye Mahkemesi 13. Hukuk Dairesi, 14.09.2023, 2021/747 E., 2023/1279 K. [strict]
+  Link: https://mevzuat.adalet.gov.tr/ictihat/930039900?query=%2B%22ay%C4%B1p%20ihbar%C4%B1%22%20%2B%22ekspertiz%22%20%2B%22sat%C4%B1m%20s%C3%B6zle%C5%9Fmesi%22
+  Rolü: Karar, ayıbın hemen bildirilmesi gerektiğini belirtmektedir. Ancak ağır kusur durumunda ayıp ihbarında bulunma zorunluluğu olmamaktadır.
+
+======================================================================
+NOTLAR / SINIRLAR
+======================================================================
+Bu soruya en yakın görülen kararlar esas alınmıştır.
+Somut olayın tüm detaylarına göre değerlendirme yapılması önerilir.
+======================================================================

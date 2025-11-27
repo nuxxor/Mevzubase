@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "question": "Nitelikli yağma suçunda TCK 150/1 uygulanır mı?",
+    "expected_tags": ["TCK 150/1"],
+    "notes": "Ceza dairesi kararları, supports_yes beklenir."
+  },
+  {
+    "id": 2,
+    "question": "Kira artışında TBK 344 ve TÜFE sınırı uygulanır mı? 2023/2024 için üst sınır nedir?",
+    "expected_tags": ["TBK 344", "TÜFE"],
+    "notes": "Kira domain; belirsiz yerine uygulanabilir/belirsiz ayrımı."
+  },
+  {
+    "id": 3,
+    "question": "Hakaret davasında 'şerefsiz' sözü hakaret midir?",
+    "expected_tags": ["hakaret"],
+    "notes": "Literal ifade; hakaret emsalleri."
+  },
+  {
+    "id": 4,
+    "question": "İş kazasında işverenin tazminat sorumluluğu nasıl belirlenir?",
+    "expected_tags": ["iş kazası", "tazminat"],
+    "notes": "Hukuk dairesi; belirsiz/verdict sınaması."
+  },
+  {
+    "id": 5,
+    "question": "Boşanma davasında nafaka hesabında TÜFE nasıl uygulanır?",
+    "expected_tags": ["nafaka", "TÜFE"],
+    "notes": "Aile hukuku; kira dışı TÜFE sinyali."
+  },
+  {
+    "id": 6,
+    "question": "Hırsızlık suçunda etkin pişmanlık hükümleri nelerdir?",
+    "expected_tags": ["etkin pişmanlık", "hırsızlık"],
+    "notes": "Ceza; result_for_question ayrımı."
+  },
+  {
+    "id": 7,
+    "question": "İstinaf mahkemesi kararında zaman aşımı nasıl hesaplanır?",
+    "expected_tags": ["istinaf", "zamanaşımı"],
+    "notes": "İstinaf item_types, tarih filtreleri."
+  },
+  {
+    "id": 8,
+    "question": "İcra takibinde borçluya usulsüz tebligat yapılırsa sonuçları nelerdir?",
+    "expected_tags": ["icra", "usulsüz tebligat"],
+    "notes": "Usul hukuku; belirsiz/uygulanamaz ayrımı."
+  }
+]

@@ -1,0 +1,40 @@
+{
+  "verdict": "uygulanabilir",
+  "reasoning": [
+    {
+      "text": "Kooperatif üyelerinin zaman aşımına uğramadan taleplerini sunabilmeleri için, genel olarak dönemsel edimlerde 5 yıllık bir zamanaşımı olduğu açıkça belirtilmiştir. Ancak, kooperatif üyelerinin taleplerinde zamanaşımı işlememesi durumu da var olabilir. Örneğin, üyelik ilişkisi devam ettiği sürece aidat alacağına ilişkin taleplerde zamanaşımı işlememektedir.",
+      "supporting_cases": [
+        "981342400",
+        "715305600"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "981342400",
+      "citation": "Yargıtay Kayseri Bölge Adliye Mahkemesi 6. Hukuk Dairesi, 21.12.2023, 2023/2387 E., 2023/2392 K.",
+      "key_role": "Zaman aşımının genel olarak 5 yıllık olduğu ve bu süre dahilinde taleplerin zamanaşımına uğradığı durumu belirtmiştir.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/981342400?query=%2B%22istinaf%20mahkemesi%22%20%2B%22zaman%20a%C5%9F%C4%B1m%C4%B1%22"
+    },
+    {
+      "id": "715305600",
+      "citation": "Yargıtay Kayseri Bölge Adliye Mahkemesi 6. Hukuk Dairesi, 05.01.2022, 2022/26 E., 2022/27 K.",
+      "key_role": "Üyelik ilişkisi devam ettiği sürece aidat alacağına ilişkin taleplerde zamanaşımı işlememesi durumunu belirtmiştir.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/715305600?query=%2B%22istinaf%20mahkemesi%22%20%2B%22zaman%20a%C5%9F%C4%B1m%C4%B1%22"
+    },
+    {
+      "id": "450939500",
+      "citation": "Yargıtay 4. Hukuk Dairesi, 01.10.2018, 2018/3403 E., 2018/5748 K.",
+      "key_role": "Kararda, davacı tarafın istinaf başvurusunun süre yönünden incelendiği ve kabul edildiği belirtilmektedir. Bu, zaman aşımının hesaplandığına işaret etmektedir.",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/450939500?query=%2B%22istinaf%20mahkemesi%22%20%2B%22zaman%20a%C5%9F%C4%B1m%C4%B1%22",
+      "bucket": "strict"
+    },
+    {
+      "id": "989658500",
+      "citation": "Yargıtay 6. Hukuk Dairesi, 30.11.2023, 2023/3760 E., 2023/4011 K.",
+      "key_role": "Kararda zamanaşımının çeşitli durumlarda kesileceği belirtilmiştir, bu da zaman aşımının hesaplanma şekliyle ilgili bilgi sağlar.",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/989658500?query=%2B%22istinaf%20mahkemesi%22%20%2B%22zaman%20a%C5%9F%C4%B1m%C4%B1%22",
+      "bucket": "strict"
+    }
+  ]
+}

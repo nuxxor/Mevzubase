@@ -1,0 +1,14 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/base/bin/python",
+  "python.terminal.activateEnvironment": true,
+  "terminal.integrated.profiles.linux": {
+    "bash (base)": {
+      "path": "/bin/bash",
+      "args": [
+        "--rcfile",
+        "${workspaceFolder}/.vscode/base-rc.sh"
+      ]
+    }
+  },
+  "terminal.integrated.defaultProfile.linux": "bash (base)"
+}

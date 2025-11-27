@@ -1,0 +1,38 @@
+======================================================================
+SONUÇ
+======================================================================
+Soru: İş kazasında işverenin tazminat sorumluluğu nasıl belirlenir?
+
+Somut olayda mevcut kararlara göre sorudaki hukuki sonuç olumlu görünmektedir.
+
+======================================================================
+GEREKÇE
+======================================================================
+1. İş kazası sonucunda meydana gelen maddi ve manevi zararlar, işverenlerden tazminat ödemelerini talep etmek için yasal bir temel oluşturur. Bu durumda, işverenlerin müşterek ve müteselsil olarak tazminatlardan sorumlu olduğu belirtilmiştir.
+   Dayanak: 920831600, 573636200
+
+======================================================================
+DAYANAK KARARLAR
+======================================================================
+• Yargıtay 4. Hukuk Dairesi, 13.10.2022, 2021/17039 E., 2022/12262 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/920831600?query=%2B%22maddi%20tazminat%22%20%2B%22manevi%20tazminat%22
+  Rolü: İşverenlerin müşterek ve müteselsil olarak tazminat ödemelerinden sorumlu olduğunu göstermektedir.
+
+• Yargıtay 21. Hukuk Dairesi, 09.07.2013, 2012/19384 E., 2013/14745 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/573636200?query=%2B%22maddi%20tazminat%22%20%2B%22manevi%20tazminat%22
+  Rolü: Sigorta şirketinin sorumluluğunun poliçe limiti ve maddi tazminatla sınırlı olduğunu göstermektedir.
+
+• Yargıtay 21. Hukuk Dairesi, 14.03.2016, 2015/9454 E., 2016/4254 K. [strict]
+  Link: https://mevzuat.adalet.gov.tr/ictihat/231509600?query=%2B%22maddi%20tazminat%22%20%2B%22manevi%20tazminat%22
+  Rolü: Mahkemece, davacılar için belirli tutarlı maddi tazminat ödenmesine karar verilmiştir.
+
+• Yargıtay 21. Hukuk Dairesi, 11.04.2017, 2016/5188 E., 2017/3057 K. [strict]
+  Link: https://mevzuat.adalet.gov.tr/ictihat/359923000?query=%2B%22maddi%20tazminat%22%20%2B%22manevi%20tazminat%22
+  Rolü: Kararda işyerinin müştereken ve müteselsilen sorumlu olduğu belirtilmiştir, bu da işverenin tazminat sorumluluğunu doğrular.
+
+======================================================================
+NOTLAR / SINIRLAR
+======================================================================
+Bu soruya en yakın görülen kararlar esas alınmıştır.
+Somut olayın tüm detaylarına göre değerlendirme yapılması önerilir.
+======================================================================

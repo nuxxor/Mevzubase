@@ -1,0 +1,40 @@
+{
+  "verdict": "uygulanabilir",
+  "reasoning": [
+    {
+      "text": "Yargıtay kararlarında nafakanın takdirinde TÜİK'in yayınladığı ÜFE oranının kullanılması gerektiği açıkça belirtilmiştir. Bu, yoksulluk nafakasının TÜFE oranına göre artırılması gerektiğini göstermektedir.",
+      "supporting_cases": [
+        "390905100",
+        "355559900"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "390905100",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 12.10.2017, 2017/12590 E., 2017/13907 K.",
+      "key_role": "yoksulluk nafakası TÜFE oranında artırılması gerektiği konusunda destek",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/390905100?query=%2B%22TMK%20175%22%20%2B%22T%C3%9CFE%22"
+    },
+    {
+      "id": "355559900",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 08.06.2017, 2016/20676 E., 2017/9516 K.",
+      "key_role": "yoksulluk nafakası TÜFE oranında artırılması gerektiği konusunda destek",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/355559900?query=%2B%22TMK%20175%22%20%2B%22T%C3%9CFE%22"
+    },
+    {
+      "id": "321398700",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 01.03.2017, 2016/12499 E., 2017/2280 K.",
+      "key_role": "Kararda, TÜFE oranında artış yapılması gerektiği belirtilmiştir. Bu, soruda sorgulanan nafakanın TÜFE'ye göre artırılması gerektiğini göstermektedir.",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/321398700?query=%2B%22TMK%20175%22%20%2B%22T%C3%9CFE%22",
+      "bucket": "broad"
+    },
+    {
+      "id": "391141000",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 19.10.2017, 2017/12881 E., 2017/14253 K.",
+      "key_role": "Kararda, davacı'nın Tüfe oranlarına dayalı olarak nafakanın artırılması talebinin yer aldığı açıkça belirtilmiştir.",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/391141000?query=%2B%22TMK%20175%22%20%2B%22T%C3%9CFE%22",
+      "bucket": "broad"
+    }
+  ]
+}

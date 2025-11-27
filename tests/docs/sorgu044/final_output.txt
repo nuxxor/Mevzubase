@@ -1,0 +1,37 @@
+======================================================================
+SONUÇ
+======================================================================
+Soru: Nitelikli yağma suçunda TCK 150/1 uygulanır mı?
+
+Somut olayda mevcut kararlara göre sorudaki hukuki sonuç olumlu görünmektedir.
+
+======================================================================
+GEREKÇE
+======================================================================
+1. TCK'nin 150/1 maddesi, hukuki alacağını tahsil amacıyla işlenen yağma suçundan dolayı uygulanmaktadır. Bu durumda nitelikli yağma suçu da bu madde kapsamında değerlendirilebilir.
+   Dayanak: 951574000, 32862400
+
+======================================================================
+DAYANAK KARARLAR
+======================================================================
+• Yargıtay 3. Ceza Dairesi, 17.09.2013, 2012/29922 E., 2013/30832 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/951574000?query=%2B%22TCK%20150/1%22%20%2B%22nitelikli%20ya%C4%9Fma%22
+  Rolü: Sanık hakkında hukuki alacağını tahsil amacıyla yağma suçundan TCK'nin 150/1. maddesi yoluyla cezalandırılması istemi ile kamu davası açıldığı belirtilmiştir.
+
+• Yargıtay Ceza Genel Kurulu, 15.09.2023, 2022/7 E., 2023/10 K.
+  Rolü: Sanık hakkında hukuki alacağını tahsil amacıyla işlenen nitelikli yağma suçundan TCK'nin 150/1 maddesi yoluyla cezalandırılması istemi ile kamu davası açıldığı belirtilmiştir.
+
+• Yargıtay 6. Ceza Dairesi, 20.09.2018, 2016/7486 E., 2018/5715 K. [strict]
+  Link: https://mevzuat.adalet.gov.tr/ictihat/441384200?query=%2B%22TCK%20150/1%22%20%2B%22nitelikli%20ya%C4%9Fma%22
+  Rolü: Kararda, sanığın savunmasını almadan karar verilmesi nedeniyle bozulmuş ve bu süreçte TCK 150/1 maddesi geçerli olduğu anlaşılmaktadır.
+
+• Yargıtay 6. Ceza Dairesi, 16.05.2022, 2021/14993 E., 2022/7152 K. [strict]
+  Link: https://mevzuat.adalet.gov.tr/ictihat/769147500?query=%2B%22TCK%20150/1%22%20%2B%22nitelikli%20ya%C4%9Fma%22
+  Rolü: Tebliğnamede, sanık hakkında TCK 150/1. maddenin uygulanması gerektiğinden bahsedilmesi, soruya olumlu bir yanıt vermektedir.
+
+======================================================================
+NOTLAR / SINIRLAR
+======================================================================
+Bu soruya en yakın görülen kararlar esas alınmıştır.
+Somut olayın tüm detaylarına göre değerlendirme yapılması önerilir.
+======================================================================

@@ -1,0 +1,40 @@
+{
+  "verdict": "uygulanabilir",
+  "reasoning": [
+    {
+      "text": "Ağır kusur (iğfal) halinde alıcı, ticari satımdaki ayıp ihbar sürelerine uyulmaksızın, kanundan doğan haklarını kullanabilir. Bu durumda, açık veya gizli ayıp olup olmadığına bakılmaksızın, ağırlık kusuru olan satıcının sorumluluğu devam eder ve alıcı dava açma hakkına sahiptir.",
+      "supporting_cases": [
+        "191992100"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "191992100",
+      "citation": "Yargıtay 19. Hukuk Dairesi, 13.10.2015, 2015/8094 E., 2015/12630 K.",
+      "key_role": "Ağır kusur durumunda alıcının ticari satımdaki ayıp ihbar sürelerine uyulmaksızın haklarını kullanabilmesi konusundaki karar",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/191992100?query=%2B%22gizli%20ay%C4%B1p%22%20%2B%22ekspertiz%22"
+    },
+    {
+      "id": "1126363600",
+      "citation": "Yargıtay İstanbul Bölge Adliye Mahkemesi 13. Hukuk Dairesi, 06.03.2025, 2022/1193 E., 2025/370 K.",
+      "key_role": "Satıcı, kusurlu olması gerekmeden zararın sorumlusu tutulabilir ve ayıplı teslimin sözleşmeye aykırılık olarak kabul edildiği ifade edilmiştir.",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/1126363600?query=%2B%22gizli%20ay%C4%B1p%22%20%2B%22ekspertiz%22%20%2B%22dava%20a%C3%A7t%C4%B1%22",
+      "bucket": "strict"
+    },
+    {
+      "id": "175964900",
+      "citation": "Yargıtay 13. Hukuk Dairesi, 07.09.2015, 2014/36262 E., 2015/26462 K.",
+      "key_role": "Mahkeme, ayıp gizli olsa da davacının ihbar yükümlülüğüne uymadığı için davanın reddine karar vermiştir.",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/175964900?query=%2B%22gizli%20ay%C4%B1p%22%20%2B%22ekspertiz%22",
+      "bucket": "broad"
+    },
+    {
+      "id": "699774100",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 13.10.2021, 2020/10625 E., 2021/10009 K.",
+      "key_role": "Kararda, araçta gizli ayıplar olduğu ve bu ayıpların düzeltilmesine rağmen sorunların devam ettiği ifade edildi. Bu durum, alıcının aracın üzerindeki sorunları bildiği halde satın almış olmasına rağme",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/699774100?query=%2B%22gizli%20ay%C4%B1p%22%20%2B%22dava%20a%C3%A7t%C4%B1%22",
+      "bucket": "broad"
+    }
+  ]
+}

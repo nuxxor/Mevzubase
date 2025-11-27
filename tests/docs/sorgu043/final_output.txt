@@ -1,0 +1,38 @@
+======================================================================
+SONUÇ
+======================================================================
+Soru: İcra takibinde borçluya usulsüz tebligat yapılırsa sonuçları nelerdir?
+
+Somut olayda mevcut kararlara göre sorudaki hukuki sonuç olumlu görünmektedir.
+
+======================================================================
+GEREKÇE
+======================================================================
+1. Kararlar, usulsüz tebligatın sonuçlarının açıkça ifade edildiğini göstermektedir. Bu sonuçlar arasında takibin iptali, kötüniyet tazminatına verilmesi ve borçlu olmadığının tespiti bulunmaktadır.
+   Dayanak: 813358800, 378380000
+
+======================================================================
+DAYANAK KARARLAR
+======================================================================
+• Yargıtay 19. Hukuk Dairesi, 13.09.2011, 2011/396 E., 2011/10704 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/813358800?query=%2B%22takipsizlik%22%20%2B%22icra%20takibi%22
+  Rolü: Mahkeme, davacının taleplerini reddederek usulsüz tebligatın sonuçlarını açıkça ifade etmiştir.
+
+• Yargıtay 19. Hukuk Dairesi, 15.05.2014, 2014/5632 E., 2014/9283 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/378380000?query=%2B%22takipsizlik%22%20%2B%22icra%20takibi%22
+  Rolü: Kararda, aleyhine yapılan icra takibinin sonuçları ve bu durumun kötüniyet tazminatı ile karşılanabileceği belirtilmiştir.
+
+• Yargıtay 12. Hukuk Dairesi, 15.09.2015, 2015/10052 E., 2015/21175 K. [strict]
+  Link: https://mevzuat.adalet.gov.tr/ictihat/174086500?query=%2B%22takipsizlik%22%20%2B%22icra%20takibi%22
+  Rolü: İcra takibi sırasında borçluya usulsüz tebligat yapıldığı için, bu durumun sonuçlarını yansıtmaktadır.
+
+• Yargıtay 19. Hukuk Dairesi, 07.10.2013, 2012/17389 E., 2013/15498 K. [strict]
+  Link: https://mevzuat.adalet.gov.tr/ictihat/489688500?query=%2B%22takipsizlik%22%20%2B%22icra%20takibi%22
+  Rolü: Kararda usulsüz tebligatın sonuçları ile ilgili bilgi verilmekte olup, bu durum soruya doğrudan cevap vermektedir.
+
+======================================================================
+NOTLAR / SINIRLAR
+======================================================================
+Bu soruya en yakın görülen kararlar esas alınmıştır.
+Somut olayın tüm detaylarına göre değerlendirme yapılması önerilir.
+======================================================================

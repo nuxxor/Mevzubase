@@ -1,0 +1,38 @@
+======================================================================
+SONUÇ
+======================================================================
+Soru: Hırsızlık suçunda etkin pişmanlık hükümleri nelerdir?
+
+Somut olayda mevcut kararlara göre sorudaki hukuki sonuç olumlu görünmektedir.
+
+======================================================================
+GEREKÇE
+======================================================================
+1. Hırsızlık suçunda etkin pişmanlık hükümlerinin uygulanma olanağı bulunmaktadır. Ancak, bu durum somut olayda koşulları oluşması gerekmektedir.
+   Dayanak: 1099238800, 178574600
+
+======================================================================
+DAYANAK KARARLAR
+======================================================================
+• Yargıtay 2. Ceza Dairesi, 13.05.2024, 2023/25230 E., 2024/7545 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/1099238800?query=%2B%22h%C4%B1rs%C4%B1zl%C4%B1k%20su%C3%A7u%22%20%2B%22etkin%20pi%C5%9Fmanl%C4%B1k%22
+  Rolü: Hırsızlık suçunda etkin pişmanlık hükümlerinin uygulanma olanağı ve koşullarının belirlenmesi
+
+• Yargıtay 17. Ceza Dairesi, 25.05.2015, 2015/7945 E., 2015/2694 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/178574600?query=%20%2B%22h%C4%B1rs%C4%B1zl%C4%B1k%20su%C3%A7undan%22%20%2B%22etkin%20pi%C5%9Fmanl%C4%B1k%20durumu%22
+  Rolü: Etkin pişmanlık durumunun somut olayda söz konusu olmadığı ve TCK'nın 269/2. maddesi uygulanması
+
+• Yargıtay 2. Ceza Dairesi, 23.01.2014, 2013/10559 E., 2014/1473 K. [strict]
+  Link: https://mevzuat.adalet.gov.tr/ictihat/194492500?query=%2B%22h%C4%B1rs%C4%B1zl%C4%B1k%20su%C3%A7u%22%20%2B%22etkin%20pi%C5%9Fmanl%C4%B1k%22
+  Rolü: Sanığın temyiz itirazları reddedilmiştir çünkü suçun teşebbüs aşamasında kalmış olması durumunda etkin pişmanlık hükümleri uygulanamayacağı belirtilmiştir.
+
+• Yargıtay 2. Ceza Dairesi, 01.10.2014, 2013/31593 E., 2014/22800 K. [strict]
+  Link: https://mevzuat.adalet.gov.tr/ictihat/190897500?query=%2B%22h%C4%B1rs%C4%B1zl%C4%B1k%20su%C3%A7u%22%20%2B%22etkin%20pi%C5%9Fmanl%C4%B1k%22
+  Rolü: Sanığın üzerine atılı hırsızlık suçunun teşebbüs aşamasında kalmış olması durumunda, etkin pişmanlık hükümleri uygulanamayacağı belirtilmiştir.
+
+======================================================================
+NOTLAR / SINIRLAR
+======================================================================
+Bu soruya en yakın görülen kararlar esas alınmıştır.
+Somut olayın tüm detaylarına göre değerlendirme yapılması önerilir.
+======================================================================

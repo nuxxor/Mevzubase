@@ -1,0 +1,41 @@
+======================================================================
+SONUÇ
+======================================================================
+Soru: Kira artışında TBK 344 ve TÜFE sınırı uygulanır mı? 2023/2024 için üst sınır nedir?
+
+Somut olayda mevcut kararlara göre sorudaki hukuki sonuç olumlu görünmektedir.
+
+======================================================================
+GEREKÇE
+======================================================================
+1. TBK 344 gereği kira artışı 12 aylık TÜFE ortalamasını aşamaz; bu oranı aşan artışlar sözleşme olsa dahi sınırlıdır.
+   Dayanak: 1158814600, 1092674400
+
+2. TBMM'nin 2023/2024 kira artış oranını TÜFE ile belirlemek için TBK 344 madde sınırı dışında tutma kararı, yasal çerçeveye uygun olarak uygulanabilir. Yargıtay kararlarında, kira artışının TÜFE oranına göre tespit edilmesi ve bu oranın yıllık bazda belirlenmesine yönelik örneklere rastlanmıştır.
+   Dayanak: 126005400, 209885700, 514766300
+
+======================================================================
+DAYANAK KARARLAR
+======================================================================
+• Yargıtay 6. Hukuk Dairesi, 08.10.2015, 2014/10127 E., 2015/8156 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/126005400?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22T%C3%9CFE%22
+  Rolü: Kira artışının TÜFE oranına göre tespit edilmesine yönelik örnek sağlar.
+
+• Yargıtay 6. Hukuk Dairesi, 16.03.2016, 2015/6889 E., 2016/2051 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/209885700?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22T%C3%9CFE%22
+  Rolü: Kira artışının yıllık TÜFE artışı uygulanması gerektiği konusunda örnek sağlar.
+
+• Yargıtay 6. Hukuk Dairesi, 16.03.2016, 2015/6889 E., 2016/2051 K.
+  Link: https://mevzuat.adalet.gov.tr/ictihat/514766300?query=%2B%22kira%20art%C4%B1%C5%9F%20oran%C4%B1%22%20%2B%22T%C3%9CFE%22
+  Rolü: Kira artışında TÜFE'nin kullanılması gerektiği konusunda örnek sağlar.
+
+• Yargıtay 3. Hukuk Dairesi, 10.06.2025, 2025/893 E., 2025/3205 K. [focus]
+  Link: https://mevzuat.adalet.gov.tr/ictihat/1158814600?query=%2B%22kira%20art%C4%B1%C5%9F%22%20%2B%22TBK%20m.344%22
+  Rolü: Sözleşme şartlarının kanun düzenlemelerine uymadığı durumlarda, kanuni düzenleme geçerlidir ve bu bağlamda TBK 344 ve TÜFE sınırı uygulanabilir.
+
+======================================================================
+NOTLAR / SINIRLAR
+======================================================================
+Bu soruya en yakın görülen kararlar esas alınmıştır.
+Somut olayın tüm detaylarına göre değerlendirme yapılması önerilir.
+======================================================================

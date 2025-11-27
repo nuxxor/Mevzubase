@@ -1,0 +1,39 @@
+{
+  "verdict": "uygulanabilir",
+  "reasoning": [
+    {
+      "text": "TCK'nin 150/1 maddesi, hukuki alacağını tahsil amacıyla işlenen yağma suçundan dolayı uygulanmaktadır. Bu durumda nitelikli yağma suçu da bu madde kapsamında değerlendirilebilir.",
+      "supporting_cases": [
+        "951574000",
+        "32862400"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "951574000",
+      "citation": "Yargıtay 3. Ceza Dairesi, 17.09.2013, 2012/29922 E., 2013/30832 K.",
+      "key_role": "Sanık hakkında hukuki alacağını tahsil amacıyla yağma suçundan TCK'nin 150/1. maddesi yoluyla cezalandırılması istemi ile kamu davası açıldığı belirtilmiştir.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/951574000?query=%2B%22TCK%20150/1%22%20%2B%22nitelikli%20ya%C4%9Fma%22"
+    },
+    {
+      "id": "32862400",
+      "citation": "Yargıtay Ceza Genel Kurulu, 15.09.2023, 2022/7 E., 2023/10 K.",
+      "key_role": "Sanık hakkında hukuki alacağını tahsil amacıyla işlenen nitelikli yağma suçundan TCK'nin 150/1 maddesi yoluyla cezalandırılması istemi ile kamu davası açıldığı belirtilmiştir."
+    },
+    {
+      "id": "441384200",
+      "citation": "Yargıtay 6. Ceza Dairesi, 20.09.2018, 2016/7486 E., 2018/5715 K.",
+      "key_role": "Kararda, sanığın savunmasını almadan karar verilmesi nedeniyle bozulmuş ve bu süreçte TCK 150/1 maddesi geçerli olduğu anlaşılmaktadır.",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/441384200?query=%2B%22TCK%20150/1%22%20%2B%22nitelikli%20ya%C4%9Fma%22",
+      "bucket": "strict"
+    },
+    {
+      "id": "769147500",
+      "citation": "Yargıtay 6. Ceza Dairesi, 16.05.2022, 2021/14993 E., 2022/7152 K.",
+      "key_role": "Tebliğnamede, sanık hakkında TCK 150/1. maddenin uygulanması gerektiğinden bahsedilmesi, soruya olumlu bir yanıt vermektedir.",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/769147500?query=%2B%22TCK%20150/1%22%20%2B%22nitelikli%20ya%C4%9Fma%22",
+      "bucket": "strict"
+    }
+  ]
+}

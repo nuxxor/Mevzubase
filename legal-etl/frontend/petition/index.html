@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Dilekçe Editörü (Demo)</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <style>
+      body {{
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        height: 100vh;
+      }}
+      .pane {{
+        flex: 1;
+        padding: 16px;
+        overflow: auto;
+      }}
+      .preview {{
+        border-left: 1px solid #ddd;
+        background: #fafafa;
+      }}
+      label {{
+        font-weight: 600;
+      }}
+      textarea, input {{
+        width: 100%;
+        box-sizing: border-box;
+        margin: 4px 0 12px 0;
+      }}
+      .warnings {{
+        border: 1px solid #f0c2c2;
+        background: #fff5f5;
+        color: #a00;
+        padding: 8px;
+        margin-bottom: 12px;
+      }}
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/javascript">
+      const e = React.createElement;
+
+      function App() {{
+        const [mode, setMode] = React.useState("qwen");
+        const [court, setCourt] = React.useState("ANKARA ASLİYE HUKUK MAHKEMESİ");
+        const [subject, setSubject] = React.useState("Alacak talebi");
+        const [davaci, setDavaci] = React.useState("Ahmet Yılmaz|12345678901|Ankara");
+        const [davali, setDavali] = React.useState("Mehmet Demir||İstanbul");
+        const [facts, setFacts] = React.useState("01.01.2023 tarihli sözleşme imzalandı.\nSözleşme bedeli ödenmedi.");
+        const [legalBasis, setLegalBasis] = React.useState("TBK m. 117, HMK m. 119");
+        const [requests, setRequests] = React.useState("Alacağın faiziyle tahsiline");
+        const [html, setHtml] = React.useState("");
+        const [warnings, setWarnings] = React.useState([]);
+        const [loading, setLoading] = React.useState(false);
+        const [error, setError] = React.useState("");
+
+        const submit = async () => {{
+          setLoading(true);
+          setError("");
+          try {{
+            const payload = {{
+              court,
+              subject,
+              davaci,
+              davali,
+              facts: facts.split("\\n").map((f) => f.trim()).filter(Boolean),
+              legal_basis: legalBasis.split(",").map((l) => l.trim()).filter(Boolean),
+              requests: requests.split("\\n").map((r) => r.trim()).filter(Boolean),
+            }};
+            const res = await fetch(`http://localhost:9000/generate`, {{
+              method: "POST",
+              headers: {{ "Content-Type": "application/json" }},
+              body: JSON.stringify(payload),
+            }});
+            if (!res.ok) throw new Error(await res.text());
+            const data = await res.json();
+            setHtml(data.html || data.text || "");
+            setWarnings(data.qa_warnings || []);
+          }} catch (err) {{
+            setError(err.toString());
+          }} finally {{
+            setLoading(false);
+          }}
+        }};
+
+        return e("div", {{ style: {{ display: "flex", width: "100%" }} }}, [
+          e("div", {{ className: "pane" }}, [
+            e("h2", null, "Dilekçe Form"),
+            e("div", null, [
+              e("label", null, "Mode (LLM)"),
+              e("select", {{
+                value: mode,
+                onChange: (ev) => setMode(ev.target.value),
+                disabled: true,
+                title: "Şimdilik qwen/static API sunucu argümanıyla seçiliyor",
+              }}, [
+                e("option", {{ value: "qwen" }}, "Qwen"),
+                e("option", {{ value: "static" }}, "Static"),
+              ]),
+            ]),
+            e("label", null, "Mahkeme"),
+            e("input", {{ value: court, onChange: (ev) => setCourt(ev.target.value) }}),
+            e("label", null, "Dava Konusu"),
+            e("input", {{ value: subject, onChange: (ev) => setSubject(ev.target.value) }}),
+            e("label", null, "Davacı (isim|tc|adres)"),
+            e("input", {{ value: davaci, onChange: (ev) => setDavaci(ev.target.value) }}),
+            e("label", null, "Davalı (isim|tc|adres)"),
+            e("input", {{ value: davali, onChange: (ev) => setDavali(ev.target.value) }}),
+            e("label", null, "Olgular (satır bazlı)"),
+            e("textarea", {{ rows: 4, value: facts, onChange: (ev) => setFacts(ev.target.value) }}),
+            e("label", null, "Hukuki Sebepler (virgülle)"),
+            e("input", {{ value: legalBasis, onChange: (ev) => setLegalBasis(ev.target.value) }}),
+            e("label", null, "Talepler (satır bazlı)"),
+            e("textarea", {{ rows: 2, value: requests, onChange: (ev) => setRequests(ev.target.value) }}),
+            e("button", {{ onClick: submit, disabled: loading }}, loading ? "Üretiliyor..." : "Taslak Üret"),
+            error && e("div", {{ className: "warnings" }}, `Hata: ${error}`),
+          ]),
+          e("div", {{ className: "pane preview" }}, [
+            e("h2", null, "Uyarılar"),
+            warnings.length > 0
+              ? e("div", {{ className: "warnings" }}, warnings.map((w, i) => e("div", {{ key: i }}, w)))
+              : e("div", null, "Uyarı yok."),
+            e("h2", null, "Taslak Önizleme"),
+            e("div", {{
+              dangerouslySetInnerHTML: {{ __html: html || "<em>Henüz taslak yok</em>" }},
+            }}),
+          ]),
+        ]);
+      }}
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(React.createElement(App));
+    </script>
+  </body>
+</html>

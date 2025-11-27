@@ -26,8 +26,15 @@ from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Tuple, Optional, Any
 from urllib.parse import quote
+from qdrant_client import QdrantClient
+from sentence_transformers import SentenceTransformer
 
 import logging
+try:
+    from opensearchpy import OpenSearch  # type: ignore
+    HAS_OPENSEARCH = True
+except Exception:
+    HAS_OPENSEARCH = False
 try:
     from logging.handlers import RotatingFileHandler
     HAS_ROTATING_HANDLER = True
@@ -67,12 +74,25 @@ CHAT_GPT_MODEL = os.environ.get("CHAT_GPT_MODEL", "gpt-4o-mini")
 OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions"
 COHERE_API_KEY = os.environ.get("COHERE_API_KEY")
 PARALLEL_API_KEY = os.environ.get("PARALLEL_API_KEY")
-RERANK_PROVIDER = os.environ.get("RERANK_PROVIDER", "none").lower()  # none|local|cohere|parallel|auto
+RERANK_PROVIDER = os.environ.get("RERANK_PROVIDER", "local").lower()  # none|local|cohere|parallel|auto
 RERANK_MODEL = os.environ.get("RERANK_MODEL", "BAAI/bge-reranker-v2-m3")
 RERANK_FALLBACK_MODEL = os.environ.get("RERANK_FALLBACK_MODEL", "jinaai/jina-reranker-v2-base-multilingual")
 RERANK_TRUST_REMOTE_CODE = os.environ.get("RERANK_TRUST_REMOTE_CODE", "true").lower() in {"1", "true", "yes", "on"}
 COHERE_RERANK_MODEL = os.environ.get("COHERE_RERANK_MODEL", "rerank-v3.5")
 RERANK_TOP_N = int(os.environ.get("RERANK_TOP_N", "50"))
+# Local öncelik, Cohere isteğe bağlı fallback
+COHERE_FALLBACK_ENABLED = os.environ.get("COHERE_FALLBACK_ENABLED", "false").lower() in {"1", "true", "yes", "on"}
+RULE_CARD_COLLECTION = os.environ.get("RULE_CARD_COLLECTION", "rule_cards")
+RULE_CARD_MODEL = os.environ.get("RULE_CARD_MODEL", "BAAI/bge-m3")
+RULE_CARD_DEVICE = os.environ.get("RULE_CARD_DEVICE", "cuda")
+RULE_CARD_QDRANT_URL = os.environ.get("RULE_CARD_QDRANT_URL", "http://localhost:6333")
+RULE_CARD_TOP_K = int(os.environ.get("RULE_CARD_TOP_K", "5"))
+
+# BM25/Hibrit ayarları
+BM25_ENABLED = os.environ.get("BM25_ENABLED", "false").lower() in {"1", "true", "yes", "on"}
+BM25_URL = os.environ.get("BM25_URL", "http://admin:admin@localhost:9200")
+BM25_INDEX = os.environ.get("BM25_INDEX", "legal_chunks_bm25")
+BM25_LIMIT = int(os.environ.get("BM25_LIMIT", "60"))
 
 MIN_TERMS = 3
 ACCEPTED_ITEM_TYPES = {"YARGITAYKARAR", "YARGITAYKARARI", "YARGITAY", "ISTINAFHUKUK", "ISTINAFCEZA"}
@@ -175,6 +195,10 @@ CONCEPT_TO_ARTICLE_HINTS = {
     "kira artış oranı": ["TBK 344"],
     "kira tespit": ["TBK 344"],
     "kira sözleşmesi": ["TBK 344"],
+    "nafaka": ["TMK 175"],
+    "yoksulluk nafakası": ["TMK 175"],
+    "iştirak nafakası": ["TMK 329"],
+    "participation allowance": ["TMK 329"],
 }
 
 # Tırnak içi ifadeleri yakalamak için desenler
@@ -307,6 +331,7 @@ def add_domain_seeds(question: str, keywords: List[Dict[str, Any]]) -> List[Dict
     """Kira/konut bağlamında deterministik TBK 344 / TÜFE sinyallerini ekler."""
     ql = (question or "").lower()
     seeds: List[str] = []
+    # Kira / konut
     if any(t in ql for t in ["kira", "kiracı", "kiralayan", "işyeri", "is yeri", "konut"]):
         seeds += [
             "TBK 344",
@@ -315,6 +340,16 @@ def add_domain_seeds(question: str, keywords: List[Dict[str, Any]]) -> List[Dict
             "tüketici fiyat endeksi",
             "tuketici fiyat endeksi",
             "kira tespiti",
+        ]
+    # Nafaka
+    if any(t in ql for t in ["nafaka", "yoksulluk nafakası", "iştirak nafakası"]):
+        seeds += [
+            "TMK 175",
+            "TMK 329",
+            "TÜFE",
+            "12 aylik ortalama",
+            "tüketici fiyat endeksi",
+            "tuketici fiyat endeksi",
         ]
     have = {kw["text"].lower() for kw in keywords if kw.get("text")}
     for s in seeds:
@@ -432,6 +467,28 @@ def _kira_focus_queries() -> List[str]:
     qs: List[str] = []
     for a in anchors:
         for c in cores[:2]:
+            qs.append(f"{_format_search_term(c)} {_format_search_term(a)}")
+    seen: set[str] = set()
+    out: List[str] = []
+    for q in qs:
+        if q not in seen:
+            seen.add(q)
+            out.append(q)
+        if len(out) >= 6:
+            break
+    return out
+
+
+def _nafaka_focus_queries() -> List[str]:
+    anchors = [
+        "TÜFE", "tüfe", "tuketici fiyat endeksi",
+        "12 aylik ortalama", "on iki aylik ortalama",
+        "TMK 175", "TMK 329",
+    ]
+    cores = ["nafaka", "yoksulluk nafakası", "iştirak nafakası"]
+    qs: List[str] = []
+    for a in anchors:
+        for c in cores:
             qs.append(f"{_format_search_term(c)} {_format_search_term(a)}")
     seen: set[str] = set()
     out: List[str] = []
@@ -643,6 +700,55 @@ def rrf_merge(ranklists: List[List[str]], k: int = 60) -> List[str]:
     return [doc for doc, _ in sorted(scores.items(), key=lambda x: x[1], reverse=True)]
 
 
+def search_bm25(query: str, limit: int = 50) -> List[Dict[str, Any]]:
+    """OpenSearch BM25 sonuçlarını döndürür (opsiyonel hibrit)."""
+    if not BM25_ENABLED or not HAS_OPENSEARCH:
+        return []
+    try:
+        client = OpenSearch(BM25_URL, verify_certs=False, timeout=10)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning(f"BM25 bağlantı hatası: {exc}")
+        return []
+    body = {
+        "size": limit,
+        "query": {
+            "match": {
+                "content": {
+                    "query": query,
+                    "operator": "and",
+                }
+            }
+        },
+    }
+    try:
+        res = client.search(index=BM25_INDEX, body=body)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning(f"BM25 arama hatası: {exc}")
+        return []
+    hits = res.get("hits", {}).get("hits", [])
+    docs: List[Dict[str, Any]] = []
+    for h in hits:
+        src = h.get("_source") or {}
+        doc_id = src.get("doc_id") or h.get("_id")
+        content = src.get("content") or ""
+        docs.append(
+            {
+                "document_id": doc_id,
+                "tam_metin": content,
+                "ozet": content[:500],
+                "kaynak": "BM25",
+                "item_type": src.get("doc_type"),
+                "bucket": "bm25",
+                "query_signature": "bm25",
+                "bm25_score": h.get("_score"),
+                "chamber": src.get("chamber"),
+                "decision_date": src.get("decision_date"),
+                "view_url": src.get("url"),
+            }
+        )
+    return docs
+
+
 def dedup_documents(docs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """document_id'ye göre deduplikasyon yapar, ilk gördüğünü korur."""
     seen = set()
@@ -821,6 +927,13 @@ def rerank_docs(query: str, docs: List[Dict[str, Any]], top_n: int = RERANK_TOP_
         text = d.get("ozet") or (d.get("tam_metin") or "")[:800]
         texts.append(text)
     order = reranker.rerank(query, texts, min(top_n, len(docs)))
+    if not order and COHERE_FALLBACK_ENABLED and COHERE_API_KEY:
+        logger.info("rerank.cohere_fallback")
+        try:
+            co_reranker = CohereReranker(api_key=COHERE_API_KEY, model=COHERE_RERANK_MODEL)
+            order = co_reranker.rerank(query, texts, min(top_n, len(docs)))
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(f"Cohere fallback başarısız: {exc}")
     if not order:
         return docs
     ordered = [docs[i] for i in order if i < len(docs)]
@@ -839,6 +952,8 @@ def build_query_buckets(
     keywords: List[Dict[str, Any]],
     extra_terms: Optional[List[str]] = None,
     max_broad_variants: int = MAX_BROAD_VARIANTS,
+    paraphrase_count: int = 3,
+    llm_for_paraphrase: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Anahtar kelimelerden:
@@ -1012,6 +1127,28 @@ def build_query_buckets(
             continue
         q = " ".join(_format_search_term(p) for p in parts)
         variant_queries.append(q)
+
+    # (d) Paraphrase üretimi (opsiyonel, LLM ile)
+    if paraphrase_count > 0:
+        try:
+            prompt = (
+                "Verilen hukuk sorgusunu 3-5 farklı biçimde Türkçe olarak yeniden yaz. "
+                "Her satıra bir varyant koy, hukuki terimleri koru, yeni terim icat etme, spam üretme.\n"
+                f"Sorgu: {strict_query}\n"
+                "Varyantlar:"
+            )
+            para_raw = _call_llm(prompt, model=llm_for_paraphrase, temperature=0.4, provider=None)
+            for line in para_raw.splitlines():
+                cand = line.strip().strip("-•")
+                if not cand:
+                    continue
+                if cand in variant_queries or cand == strict_query:
+                    continue
+                variant_queries.append(cand)
+                if len(variant_queries) >= (paraphrase_count + len(domain_pivot_queries)):
+                    break
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(f"Paraphrase üretilemedi: {exc}")
 
     # (c) İstersen eski article+crime, article+concept varyantlarını da
     # buraya ekleyebilirsin; ama yukarıdaki genel mantık çoğu durumu kapsıyor.
@@ -1512,7 +1649,7 @@ def _call_chatgpt(prompt: str, model: str = CHAT_GPT_MODEL, temperature: float =
 
 def _call_llm(prompt: str, model: Optional[str] = None, temperature: float = 0.2, 
               timeout: int = 120, provider: Optional[str] = None) -> str:
-    """Seçili LLM sağlayıcısını kullanarak prompt için cevap alır."""
+    """Seçili LLM sağlayıcısını kullanarak prompt için cevap alır (varsayılan Ollama)."""
     if provider is None:
         provider = SELECTED_LLM_PROVIDER or "ollama"
     if model is None:
@@ -1825,7 +1962,39 @@ def summarize_decision(decision_json: Dict[str, Any], question: str) -> Dict[str
     
     return result
 
-def aggregate_decisions(decision_cards: List[Dict[str, Any]], question: str) -> Dict[str, Any]:
+def fetch_rule_cards(query: str, top_k: int = RULE_CARD_TOP_K) -> List[Dict[str, Any]]:
+    """
+    rule_cards koleksiyonundan semantik olarak en yakın kartları çeker.
+    rule alanı boş olan kartlar filtrelenir.
+    """
+    try:
+        model = SentenceTransformer(RULE_CARD_MODEL, device=RULE_CARD_DEVICE)
+        client = QdrantClient(RULE_CARD_QDRANT_URL)
+        vec = model.encode([query], normalize_embeddings=True)[0].tolist()
+        res = client.query_points(
+            collection_name=RULE_CARD_COLLECTION,
+            query=vec,
+            limit=top_k,
+            with_payload=True,
+            with_vectors=False,
+        ).points
+    except Exception as e:  # noqa: BLE001
+        logger.error(f"Rule card fetch hatası: {e}")
+        return []
+
+    cards: List[Dict[str, Any]] = []
+    for p in res:
+        payload = p.payload or {}
+        rule_text = (payload.get("rule") or "").strip()
+        if not rule_text:
+            continue
+        card = dict(payload)
+        card["card_id"] = str(p.id)
+        card["score"] = p.score
+        cards.append(card)
+    return cards
+
+def aggregate_decisions(decision_cards: List[Dict[str, Any]], question: str, rule_cards: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
     """
     Karar kartlarını birleştirerek final cevabı üretir (REDUCE aşaması).
     SADECE is_relevant_to_question=true kartları kullanır.
@@ -1855,36 +2024,38 @@ def aggregate_decisions(decision_cards: List[Dict[str, Any]], question: str) -> 
     
     # Eski behaviour: ama artık bütün kartlar yerine sadece relevant_cards
     cards_summary = json.dumps(relevant_cards, ensure_ascii=False, indent=2)
+    rule_cards = rule_cards or []
+    rule_cards_summary = json.dumps(rule_cards, ensure_ascii=False, indent=2)
     
     prompt = (
-        "Aşağıda bir hukuki soru ve bu soruya İLGİLİ Yargıtay kararlarının özetleri verilmiştir.\n"
-        "NOT: Bu kartlar zaten is_relevant_to_question=true olarak filtrelenmiştir.\n"
-        "Sadece bu karar özetlerine dayanarak soruya net bir cevap ver.\n\n"
+        "Aşağıda bir hukuki soru, İLGİLİ Yargıtay kararlarının özetleri ve aynı issue için rule_cards koleksiyonundan çekilmiş kural kartları verilmiştir.\n"
+        "Sadece bu kararlara ve kural kartlarına dayanarak soruya net bir cevap ver.\n\n"
         
         "KURALLAR:\n"
-        "- Soruya net bir sonuç ver: uygulanabilir / uygulanamaz / belirsiz\n"
+        "- SADECE verilen karar ve kural kartlarındaki bilgilere dayan; dış bilgi ekleme.\n"
+        "- Soruya net bir sonuç ver: uygulanabilir / uygulanamaz / belirsiz.\n"
         "- Karar özetlerindeki result_for_question değerlerine bakarak çoğunluğu hesapla:\n"
         "  * supports_yes çoğunlukta → uygulanabilir\n"
         "  * supports_no çoğunlukta → uygulanamaz\n"
         "  * Eşit veya belirsiz → belirsiz\n"
-        "- Her gerekçe maddesi için en az bir supporting_cases ID'si vermek ZORUNLU\n"
-        "- Hiçbir hukuki iddia supporting_cases listesi boş kalamaz\n"
-        "- Karar özetlerinde olmayan bilgi ekleme\n\n"
+        "- Kural kartlarını (issue, rule, exceptions, citations) dikkate al; gerekçe maddesinde en az bir kural kartı referansı (card_id veya citation) ve buna karşılık gelen karar id'lerini birlikte ver.\n"
+        "- Her gerekçe maddesi için en az bir supporting_cases ID'si vermek ZORUNLU (boş olamaz).\n"
+        "- Kartlarda olmayan yeni iddia veya kaynak üretme; sadece mevcut kart id'lerini kullan.\n\n"
         
         "ÇOK ÖNEMLİ - ÇIKTI FORMATI:\n"
-        "- SADECE JSON döndür, başka hiçbir metin ekleme\n"
-        "- Markdown code block (```) kullanma\n"
-        "- Açıklama ekleme, direkt JSON ile başla\n\n"
+        "- SADECE JSON döndür, başka hiçbir metin ekleme; Markdown code block (```) kullanma.\n"
+        "- reasoning maddelerinde kural kartı referansını (card_id veya citation) metne dahil et ve hangi karar id'leriyle desteklendiğini yaz.\n\n"
         
         f"SORU:\n{question}\n\n"
         f"İLGİLİ KARAR ÖZETLERİ ({len(relevant_cards)} karar):\n{cards_summary}\n\n"
+        f"KURAL KARTLARI ({len(rule_cards)} adet, rule_cards koleksiyonundan):\n{rule_cards_summary}\n\n"
         
         "ÇIKTI ŞU FORMATTA OLMALI (SADECE BU JSON, BAŞKA HİÇBİR ŞEY):\n"
         "{\n"
         '  "verdict": "uygulanabilir",\n'
         '  "reasoning": [\n'
         '    {\n'
-        '      "text": "...",\n'
+        '      "text": "... kural kartı referansı (card_id veya citation) + karar id\'leri ...",\n'
         '      "supporting_cases": ["karar_id_1", "karar_id_2"]\n'
         '    }\n'
         '  ],\n'
@@ -1947,9 +2118,10 @@ def verify_answer(question: str, decision_cards: List[Dict[str, Any]],
         "Taslak cevaptaki her gerekçe maddesinin, KARAR ÖZETLERİ içinde açık bir dayanağı olup olmadığını kontrol et.\n\n"
         
         "GÖREV:\n"
-        "- Dayanağı olmayan gerekçe maddelerini çıkart\n"
+        "- Dayanağı olmayan gerekçe maddelerini çıkar veya işaretle\n"
         "- supporting_cases ID'lerinin karar özetleri içinde gerçekten var olduğunu kontrol et\n"
         "- is_relevant_to_question = false olan kartları supporting_cases listesinden çıkar\n"
+        "- Kartlarda olmayan yeni iddia veya kaynak üretme\n"
         "- Çıktıyı aynı JSON formatında döndür\n\n"
         
         "ÇOK ÖNEMLİ - ÇIKTI FORMATI:\n"
@@ -2050,6 +2222,9 @@ def format_legal_output(verified_answer: Dict[str, Any], question: str) -> str:
     output_lines.append("=" * 70)
     
     reasoning = verified_answer.get("reasoning", [])
+    if not reasoning:
+        output_lines.append("Destekleyen gerekçe bulunamadı; yeterli kaynak yok.")
+        output_lines.append("")
     for i, item in enumerate(reasoning, 1):
         text = item.get("text", "")
         cases = item.get("supporting_cases", [])
@@ -2064,6 +2239,9 @@ def format_legal_output(verified_answer: Dict[str, Any], question: str) -> str:
     output_lines.append("=" * 70)
     
     cases_used = verified_answer.get("cases_used", [])
+    if not cases_used:
+        output_lines.append("Hiç karar kaynağı bulunamadı; lütfen farklı ifadelerle tekrar deneyin.")
+        output_lines.append("")
     for case in cases_used:
         citation = case.get("citation", "")
         key_role = case.get("key_role", "")
@@ -2103,6 +2281,7 @@ def run_llm_pipeline(
     years_back: Optional[int] = 15,
     sources: Optional[List[str]] = None,
     output_base_dir: str = "tests/docs",
+    no_answer_threshold: float = 0.0,
 ) -> Dict[str, Any]:
     """LLM pipeline: Soru -> Anahtar kelime -> Arama -> Analiz adımlarını yürütür."""
     
@@ -2227,7 +2406,9 @@ def run_llm_pipeline(
     safe_print("\n🌐 Sorgu Bucket'ları Oluşturuluyor (Multi-Query Retrieval)...")
     query_buckets = build_query_buckets(
         keyword_objects,
-        extra_terms=literal_keywords  # literal terimleri add-one varyantlarına ekle
+        extra_terms=literal_keywords,  # literal terimleri add-one varyantlarına ekle
+        paraphrase_count=3,
+        llm_for_paraphrase=os.environ.get("PARAPHRASE_MODEL"),
     )
     
     strict_query = query_buckets["strict_query"]
@@ -2333,6 +2514,27 @@ def run_llm_pipeline(
                     ranklists.append(broad_rank)
     if broad_queries:
         safe_print(f"    Broad ile yeni eklenen doküman: {new_from_broad}")
+
+    # BM25 hibrit araması (opsiyonel)
+    if BM25_ENABLED:
+        safe_print("\n🧭 BM25 Hibrit Arama çalışıyor...")
+        bm25_docs = search_bm25(question, limit=min(BM25_LIMIT, metadata_limit))
+        new_bm25: List[Dict[str, Any]] = []
+        for d in bm25_docs:
+            did = d.get("document_id")
+            if did and did in seen_ids:
+                continue
+            if did:
+                seen_ids.add(did)
+            new_bm25.append(d)
+        if new_bm25:
+            all_docs_meta.extend(new_bm25)
+            bm25_rank = [d.get("document_id") for d in new_bm25 if d.get("document_id")]
+            if bm25_rank:
+                ranklists.append(bm25_rank)
+            safe_print(f"    BM25 ile yeni eklenen: {len(new_bm25)}")
+        else:
+            safe_print("    BM25 sonuç eklemedi (ya sonuç yok ya da hepsi daha önce görüldü).")
     
     all_docs_meta = dedup_documents(all_docs_meta)
     meta_count = len(all_docs_meta)
@@ -2478,16 +2680,30 @@ def run_llm_pipeline(
     
     safe_print(f"   ✓ {len(decision_cards)} karar özetlendi")
     
+    safe_print("\n📇 Rule Card Retrieval: rule_cards koleksiyonu")
+    rule_cards = fetch_rule_cards(question, top_k=RULE_CARD_TOP_K)
+    safe_print(f"   ✓ {len(rule_cards)} rule card çekildi")
+    
     safe_print("\n🤖 REDUCE Aşaması: Final Cevap Üretiliyor...")
     # Kaç kartın gerçekten ilgili olduğunu logla
     relevant_count = sum(1 for c in decision_cards if c.get("is_relevant_to_question"))
     safe_print(f"   ℹ️ {relevant_count}/{len(decision_cards)} karar soruyla ilgili işaretlendi")
     
-    draft_answer = aggregate_decisions(decision_cards, question)
-    
-    # Madde 7: Halüsinasyon kontrolü
-    safe_print("\n✅ Halüsinasyon Kontrolü...")
-    verified_answer = verify_answer(question, decision_cards, draft_answer)
+    # Eğer yeterince güçlü kaynak yoksa no-answer fallback
+    max_meta = max((d.get("bm25_score") or d.get("score") or 0.0) for d in all_docs_full) if all_docs_full else 0.0
+    if no_answer_threshold > 0 and max_meta < no_answer_threshold:
+        safe_print("\n⚠️ Yeterli güven yok, no-answer branch tetiklendi.")
+        verified_answer = {
+            "verdict": "belirsiz",
+            "reasoning": [{"text": "Soruya dair yeterli güçlü kaynak bulunamadı; lütfen farklı ifadelerle tekrar deneyin.", "supporting_cases": []}],
+            "cases_used": [],
+        }
+    else:
+        draft_answer = aggregate_decisions(decision_cards, question, rule_cards)
+        
+        # Madde 7: Halüsinasyon kontrolü
+        safe_print("\n✅ Halüsinasyon Kontrolü...")
+        verified_answer = verify_answer(question, decision_cards, draft_answer)
     
     # DETERMINISTIK EMSAL ZORUNLULUĞU
     # LLM hiç emsal döndürmese bile, mutlaka en az birkaç yakın karar göster
@@ -2595,6 +2811,10 @@ def run_llm_pipeline(
     with cards_path.open("w", encoding="utf-8") as f:
         for card in decision_cards:
             f.write(json.dumps(card, ensure_ascii=False) + "\n")
+    rule_cards_path = run_dir / "rule_cards.ndjson"
+    with rule_cards_path.open("w", encoding="utf-8") as f:
+        for card in rule_cards:
+            f.write(json.dumps(card, ensure_ascii=False) + "\n")
     
     # Verified answer'ı kaydet
     answer_path = run_dir / "verified_answer.json"
@@ -2606,6 +2826,7 @@ def run_llm_pipeline(
     
     safe_print(f"\n💾 Dosyalar Kaydedildi:")
     safe_print(f"   📄 Decision Cards: {cards_path}")
+    safe_print(f"   📇 Rule Cards: {rule_cards_path}")
     safe_print(f"   📊 Verified Answer: {answer_path}")
     safe_print(f"   📝 Final Output: {output_path}")
     
@@ -2620,6 +2841,7 @@ def run_llm_pipeline(
         "fulltext_docs": len(all_docs_full),
         "duration_sec": duration,
         "decision_cards": decision_cards,
+        "rule_cards": rule_cards,
         "verified_answer": verified_answer,
         "formatted_output": formatted_output
     }

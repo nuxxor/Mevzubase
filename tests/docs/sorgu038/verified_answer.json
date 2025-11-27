@@ -1,0 +1,40 @@
+{
+  "verdict": "uygulanabilir",
+  "reasoning": [
+    {
+      "text": "'şerefsiz' kelimesinin hakaret olarak değerlendirildiği ve bu tür ifadelerin suçun oluşmasına neden olduğu birçok karar örneği bulunmaktadır.",
+      "supporting_cases": [
+        "186417600",
+        "90498900",
+        "91417300"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "186417600",
+      "citation": "Yargıtay 23. Ceza Dairesi, 06.05.2015, 2015/2212 E., 2015/1273 K.",
+      "key_role": "Sanığın 'şerefsizler' ifadesinin hakaret olduğu kabul edildiği karar örneği.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/186417600?query=%2B%22hakaret%22%20%2B%22%C5%9Ferefsiz%22"
+    },
+    {
+      "id": "90498900",
+      "citation": "Yargıtay 2. Ceza Dairesi, 02.12.2013, 2012/7925 E., 2013/28421 K.",
+      "key_role": "Sanığın 'şerefsiz' kelimesinin hakaret olduğu kabul edildiği karar örneği.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/90498900?query=%2B%22hakaret%22%20%2B%22%C5%9Ferefsiz%22"
+    },
+    {
+      "id": "91417300",
+      "citation": "Yargıtay 2. Ceza Dairesi, 05.05.2011, 2009/42077 E., 2011/9651 K.",
+      "key_role": "Sanığın 'şerefsizler' ifadesinin hakaret olduğu kabul edildiği karar örneği.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/91417300?query=%2B%22hakaret%22%20%2B%22%C5%9Ferefsiz%22"
+    },
+    {
+      "id": "366790000",
+      "citation": "Yargıtay 18. Ceza Dairesi, 19.09.2017, 2015/39672 E., 2017/9142 K.",
+      "key_role": "Tutanaklar ve belgeler sanığın 'şerefsiz' sözüyle hakaret yaptığı sonucuna varmıştır.",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/366790000?query=%2B%22hakaret%22%20%2B%22%C5%9Ferefsiz%22",
+      "bucket": "strict"
+    }
+  ]
+}

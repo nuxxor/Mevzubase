@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: 'Merriweather', serif;
+  
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+  --color-brand-950: #172554;
+  
+  --color-paper: #ffffff;
+  
+  --shadow-page: 0 0 0 1px rgba(0,0,0,0.03), 0 4px 24px rgba(0,0,0,0.06);
+}
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+  }
+}
+
+/* Custom Scrollbar for Sidebar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 rounded-full;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-400;
+}
+
+/* Tiptap Editor Styles - A4 Paper Look */
+.ProseMirror {
+  min-height: 100%;
+  outline: none;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: #94a3b8;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Typography improvements for legal text */
+.ProseMirror h1 {
+  @apply text-2xl font-bold mb-4 text-slate-900;
+}
+.ProseMirror h2 {
+  @apply text-xl font-bold mb-3 text-slate-800;
+}
+.ProseMirror h3 {
+  @apply text-lg font-semibold mb-2 text-slate-800;
+}
+.ProseMirror p {
+  @apply mb-3 leading-relaxed text-slate-700;
+  text-align: justify;
+}
+.ProseMirror ul {
+  @apply list-disc ml-6 mb-4;
+}
+.ProseMirror ol {
+  @apply list-decimal ml-6 mb-4;
+}
+.ProseMirror blockquote {
+  @apply border-l-4 border-slate-300 pl-4 italic my-4 text-slate-600;
+}
+.ProseMirror a {
+  @apply text-brand-600 underline decoration-brand-300 underline-offset-2 hover:text-brand-800;
+}

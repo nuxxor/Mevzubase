@@ -1,0 +1,13 @@
+<style>body{font-family:'Times New Roman',serif;font-size:14px;line-height:1.5;} h1{text-align:center;font-size:18px;} h2{margin-top:12px;} ul,ol{padding-left:20px;} .section{margin-bottom:12px;}</style>
+<h1>ANKARA ASLİYE HUKUK MAHKEMESİ
+
+SAYIN MAHKEMESİ&#x27;NE</h1>
+<div class="section"><h2>Taraflar</h2><ul><li>DAVACI: Ahmet Yılmaz | TC: 12345678901 | Adres: Ankara</li><li>DAVALI: Mehmet Demir | Adres: İstanbul</li></ul></div>
+<div class="section"><h2>Dava Konusu</h2><p>Alacak talebi</p></div>
+<div class="section"><h2>Açıklamalar</h2><ol><li>01.01.2023 tarihli sözleşme imzalandı.</li><li>Sözleşme bedeli ödenmedi.</li></ol></div>
+<div class="section"><h2>Hukuki Sebepler</h2><p>TBK m. 117, HMK m. 119</p></div>
+<div class="section"><h2>Deliller</h2><ol><li>Ek-1: Sözleşme</li><li>Ek-2: Dekont</li></ol></div>
+<div class="section"><h2>Sonuç ve İstem</h2><ol><li>Alacağın faiziyle tahsiline</li></ol></div>
+<div class="section"><h2>Tarih ve İmza</h2><p>2025-11-26</p><p>İmza</p></div>
+<div class="section"><h2>Ekler</h2><ul><li>Ek-1: Ek-1 - Sözleşme</li><li>Ek-2: Ek-2 - Dekont</li></ul></div>
+<p>Saygılarımızla arz ederiz.</p>

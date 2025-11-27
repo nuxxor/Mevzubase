@@ -1,0 +1,40 @@
+{
+  "verdict": "uygulanabilir",
+  "reasoning": [
+    {
+      "text": "Yoksulluk nafakasının yıllık artış oranı, toptan eşya fiyatları endeksi (TEFE) oranına göre belirlenmelidir. Bu kural kartı (card_id: 7), yoksulluk nafakası konusunda yıllık artışın nasıl hesaplanacağını belirtmektedir. Kararlar arasında, TMK 175 maddesi kapsamında nafakanın artırılması taleplerinin kabul edildiği ve bu artışların TÜFE oranına göre hesaplandığı örnekler bulunmaktadır (karar id'leri: 361599500, 189780800).",
+      "supporting_cases": [
+        "361599500",
+        "189780800"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "361599500",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 03.05.2017, 2016/17329 E., 2017/6432 K.",
+      "key_role": "Nafakanın yoksulluk nafakası niteliğinde olduğu ve mahkemenin kararı usul ve yasaya aykırı olduğu için temyizle bozulduğu belirtilmiştir.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/361599500?query=%2B%22TMK%20175%22%20%2B%22nafaka%20art%C4%B1r%C4%B1m%C4%B1%22"
+    },
+    {
+      "id": "189780800",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 03.05.2017, 2016/17329 E., 2017/6432 K.",
+      "key_role": "Nafakanın TÜFE oranında artırılması gerektiği ve nafakanın yoksulluk nafakası niteliğinde olduğu belirtilmiştir.",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/189780800?query=%2B%22TMK%20175%22%20%2B%22nafaka%20art%C4%B1r%C4%B1m%C4%B1%22"
+    },
+    {
+      "id": "231129400",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 18.01.2016, 2015/16624 E., 2016/178 K.",
+      "key_role": "Kararda, davacının taleplerinin kabul edildiği ve nafakanın artırıldığı belirtilmiştir.",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/231129400?query=%2B%22TMK%20175%22%20%2B%22nafaka%20art%C4%B1r%C4%B1m%C4%B1%22",
+      "bucket": "strict"
+    },
+    {
+      "id": "213453500",
+      "citation": "Yargıtay 3. Hukuk Dairesi, 29.03.2016, 2016/2469 E., 2016/4798 K.",
+      "key_role": "Soru ile ilgili emsal",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/213453500?query=%2B%22TMK%20175%22%20%2B%22nafaka%20art%C4%B1r%C4%B1m%C4%B1%22",
+      "bucket": "strict"
+    }
+  ]
+}

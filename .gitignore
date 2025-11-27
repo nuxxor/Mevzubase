@@ -17,6 +17,11 @@ __pycache__/
 *.pyo
 *.pyd
 
+# Large local datasets
+data/*.ndjson
+legal-etl/yargitaydocs/*.ndjson
+legal-etl/cleaned/**/*.ndjson
+
 # Local env files
 .env
 .env.*

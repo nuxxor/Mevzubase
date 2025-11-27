@@ -1,0 +1,47 @@
+{
+  "verdict": "uygulanabilir",
+  "reasoning": [
+    {
+      "text": "Borçluya usulsüz tebligat yapıldığında, haksız bir icra takibine yol açabileceği ve bu durumda kötüniyet tazminatına da başvurulabileceği görülmektedir.",
+      "supporting_cases": [
+        "813358800",
+        "378380000"
+      ]
+    },
+    {
+      "text": "Usulsüz tebligatta bulunulduğunda, icra takibinin iptali talep edilebilir ve bu durumda mahkeme davanın reddine karar verebilir.",
+      "supporting_cases": [
+        "813358800",
+        "378380000"
+      ]
+    }
+  ],
+  "cases_used": [
+    {
+      "id": "813358800",
+      "citation": "Yargıtay 19. Hukuk Dairesi, 13.09.2011, 2011/396 E., 2011/10704 K.",
+      "key_role": "icra takibinde usulsüz tebligatın kötüniyet tazminatına yol açabileceği",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/813358800?query=%2B%22takipsizlik%22%20%2B%22icra%20takibi%22"
+    },
+    {
+      "id": "378380000",
+      "citation": "Yargıtay 19. Hukuk Dairesi, 15.05.2014, 2014/5632 E., 2014/9283 K.",
+      "key_role": "usulsüz tebligatta bulunulduğunda haksız icra takibine yol açabileceği",
+      "url": "https://mevzuat.adalet.gov.tr/ictihat/378380000?query=%2B%22takipsizlik%22%20%2B%22icra%20takibi%22"
+    },
+    {
+      "id": "174086500",
+      "citation": "Yargıtay 12. Hukuk Dairesi, 15.09.2015, 2015/10052 E., 2015/21175 K.",
+      "key_role": "Borçluya usulsüz tebligat yapıldığı için, borçlu işlemi iptal etme talebinde bulunmuş ancak mahkemece istemin reddine karar verilmiştir.",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/174086500?query=%2B%22takipsizlik%22%20%2B%22icra%20takibi%22",
+      "bucket": "strict"
+    },
+    {
+      "id": "489688500",
+      "citation": "Yargıtay 19. Hukuk Dairesi, 07.10.2013, 2012/17389 E., 2013/15498 K.",
+      "key_role": "Kararda usulsüz tebligatin sonuçları belirtilmiştir, ancak doğrudan borçluya usulsüz tebligatın sonuçlarını detaylıyor olmamaktadır. Ancak, genel olarak usulsüz tebligatın duruşmanın gerçekleşmemesine",
+      "view_url": "https://mevzuat.adalet.gov.tr/ictihat/489688500?query=%2B%22takipsizlik%22%20%2B%22icra%20takibi%22",
+      "bucket": "strict"
+    }
+  ]
+}
