@@ -499,6 +499,7 @@ const LandingPage = ({ onNavigate, isLoaded }) => {
   };
 
   const handleCopySummary = () => {
+    if (!active) return;
     navigator.clipboard?.writeText(active.summary).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1200);
@@ -831,74 +832,95 @@ const LandingPage = ({ onNavigate, isLoaded }) => {
         position: 'relative',
         overflow: 'hidden'
         }}>
-          <div className="light-beam" />
+          <div className="light-beam" style={{ pointerEvents: 'none' }} />
           {/* Main Demo Card Container */}
           <div className="hero-demo" style={{
             width: '100%',
-            maxWidth: '560px',
+            maxWidth: '580px',
             opacity: isLoaded ? 1 : 0,
             transform: isLoaded ? `translateY(${parallaxY * -0.15}px) scale(1)` : 'translateY(40px) scale(0.95)',
             transition: 'all 1s cubic-bezier(0.4, 0, 0.2, 1) 0.4s',
-            animation: 'none',
-            padding: '12px',
-            zIndex: 1
+            padding: '16px',
+            zIndex: 1,
+            background: 'rgba(255,255,255,0.2)',
+            borderRadius: '20px',
+            border: '1px solid rgba(0,0,0,0.04)',
+            boxShadow: '0 30px 80px rgba(0,0,0,0.15)'
           }}>
             {/* Persona toggles */}
             <div style={{
               display: 'flex',
+              alignItems: 'center',
               gap: '8px',
-              marginBottom: '12px'
+              marginBottom: '14px',
+              justifyContent: 'center'
             }}>
-              {personaLabels.map(p => (
-                <button
-                  key={p.key}
-                  onClick={() => { setPersona(p.key); setActiveDemo(0); }}
-                  style={{
-                    padding: '8px 10px',
-                    borderRadius: '10px',
-                    border: persona === p.key ? '1px solid rgba(99,133,181,0.4)' : '1px solid rgba(0,0,0,0.06)',
-                    background: persona === p.key ? 'rgba(99,133,181,0.12)' : '#f7f9fb',
-                    color: '#1a1a1a',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.25s ease'
-                  }}
-                >
-                  {p.label}
-                </button>
-              ))}
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'nowrap' }}>
+                {personaLabels.map(p => (
+                  <button
+                    key={p.key}
+                    type="button"
+                    onClick={() => { setPersona(p.key); setActiveDemo(0); }}
+                    style={{
+                      padding: '9px 12px',
+                      borderRadius: '999px',
+                      border: persona === p.key ? `1px solid ${personaColors[p.key]}60` : '1px solid rgba(0,0,0,0.06)',
+                      background: persona === p.key 
+                        ? `linear-gradient(120deg, ${personaColors[p.key]}20 0%, ${personaColors[p.key]}10 100%)`
+                        : '#f7f9fb',
+                      color: '#0f172a',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      transition: 'all 0.25s ease',
+                      boxShadow: persona === p.key ? `0 10px 25px ${personaColors[p.key]}25` : 'none'
+                    }}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
             </div>
             {/* Query Card */}
             <div style={{
-              background: '#ffffff',
+              background: '#0f172a',
               borderRadius: '16px',
-              padding: '28px 32px',
-              boxShadow: '0 25px 80px rgba(0, 0, 0, 0.12), 0 10px 30px rgba(0, 0, 0, 0.08)',
-              marginBottom: '16px'
+              padding: '22px 24px',
+              marginBottom: '14px',
+              border: '1px solid rgba(255,255,255,0.06)',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.25)',
+              color: '#e2e8f0',
+              position: 'relative',
+              overflow: 'hidden'
             }}>
               <div style={{
-                fontSize: '12px',
-                color: 'rgba(0, 0, 0, 0.45)',
-                marginBottom: '16px',
-                fontWeight: '600',
-                letterSpacing: '0.8px',
+                position: 'absolute',
+                inset: 0,
+                background: `radial-gradient(circle at 20% 10%, ${personaColors[persona]}25, transparent 45%), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1), transparent 50%)`,
+                pointerEvents: 'none'
+              }} />
+              <div style={{
+                fontSize: '11px',
+                color: 'rgba(226, 232, 240, 0.7)',
+                marginBottom: '12px',
+                fontWeight: '700',
+                letterSpacing: '1px',
                 textTransform: 'uppercase'
               }}>Sorgunuz</div>
               
               <div style={{
                 fontSize: '16px',
-                color: '#1a1a1a',
+                color: '#e2e8f0',
                 lineHeight: '1.65',
                 minHeight: '90px',
-                fontWeight: '400',
+                fontWeight: '500',
                 position: 'relative'
               }}>
                 {isLoadingDemo && (
                   <div style={{ position: 'absolute', inset: 0, display: 'grid', gap: '10px' }}>
-                    <div style={{ height: '12px', width: '80%', background: 'rgba(0,0,0,0.06)', borderRadius: '6px', animation: 'shimmer 1.3s ease infinite' }} />
-                    <div style={{ height: '12px', width: '90%', background: 'rgba(0,0,0,0.06)', borderRadius: '6px', animation: 'shimmer 1.3s ease infinite' }} />
-                    <div style={{ height: '12px', width: '70%', background: 'rgba(0,0,0,0.06)', borderRadius: '6px', animation: 'shimmer 1.3s ease infinite' }} />
+                    <div style={{ height: '12px', width: '80%', background: 'rgba(255,255,255,0.08)', borderRadius: '6px', animation: 'shimmer 1.3s ease infinite' }} />
+                    <div style={{ height: '12px', width: '90%', background: 'rgba(255,255,255,0.08)', borderRadius: '6px', animation: 'shimmer 1.3s ease infinite' }} />
+                    <div style={{ height: '12px', width: '70%', background: 'rgba(255,255,255,0.08)', borderRadius: '6px', animation: 'shimmer 1.3s ease infinite' }} />
                   </div>
                 )}
                 {typingText}
@@ -906,77 +928,79 @@ const LandingPage = ({ onNavigate, isLoaded }) => {
                   display: 'inline-block',
                   width: '2px',
                   height: '20px',
-                  background: '#1a1a1a',
+                  background: '#e2e8f0',
                   marginLeft: '3px',
                   verticalAlign: 'middle',
                   animation: 'blink 1s infinite'
                 }} />
               </div>
               
-              {/* Referenced decisions - larger */}
-              <div style={{
-                display: 'flex',
-                gap: '10px',
-                marginTop: '20px',
-                flexWrap: 'wrap'
-              }}>
-                {active.refs.map((ref, i) => (
-                  <div
-                    key={i}
-                    onClick={() => handleRefClick(i)}
-                    onMouseEnter={() => setHoveredRef(i)}
-                    onMouseLeave={() => setHoveredRef(null)}
-                    style={{
-                      position: 'relative',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      padding: '10px 14px',
-                      background: 'linear-gradient(135deg, rgba(99, 133, 181, 0.08) 0%, rgba(99, 133, 181, 0.04) 100%)',
-                      border: '1px solid rgba(99, 133, 181, 0.15)',
-                      borderRadius: '10px',
-                      fontSize: '12px',
-                      fontWeight: '500',
-                      cursor: 'pointer',
-                      transition: 'transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease',
-                      boxShadow: activeDemo === i ? '0 14px 34px rgba(99,133,181,0.35)' : 'none',
-                      transform: activeDemo === i ? 'translateY(-2px)' : 'translateY(0)',
-                      borderColor: activeDemo === i ? 'rgba(99,133,181,0.4)' : 'rgba(99,133,181,0.15)'
-                    }}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(99, 133, 181, 0.7)" strokeWidth="1.5">
-                      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                      <path d="M14 2v6h6"/>
-                    </svg>
-                    <span style={{ color: 'rgba(99, 133, 181, 0.9)' }}>{ref.hd}</span>
-                    <span style={{ color: 'rgba(0, 0, 0, 0.5)' }}>{ref.no}</span>
-                    {hoveredRef === i && (
-                      <div style={{
-                        position: 'absolute',
-                        top: '-42px',
-                        left: '0',
-                        padding: '8px 10px',
-                        background: '#0a0a0a',
-                        color: '#fafafa',
-                        fontSize: '11px',
-                        borderRadius: '8px',
-                        boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
-                        whiteSpace: 'nowrap',
-                        border: '1px solid rgba(99,133,181,0.35)'
-                      }}>
-                        {ref.info}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+              {/* Referenced decisions - redesigned */}
+              {active && (
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                  gap: '10px',
+                  marginTop: '18px'
+                }}>
+                  {active.refs.map((ref, i) => (
+                    <div
+                      key={i}
+                      onClick={() => handleRefClick(i)}
+                      onMouseEnter={() => setHoveredRef(i)}
+                      onMouseLeave={() => setHoveredRef(null)}
+                      style={{
+                        position: 'relative',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '10px 12px',
+                        background: 'rgba(255,255,255,0.04)',
+                        border: activeDemo === i ? `1px solid ${personaColors[persona]}60` : '1px solid rgba(255,255,255,0.06)',
+                        borderRadius: '10px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        transition: 'transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease',
+                        boxShadow: activeDemo === i ? `0 12px 30px ${personaColors[persona]}30` : 'none',
+                        transform: activeDemo === i ? 'translateY(-2px)' : 'translateY(0)',
+                        color: '#e2e8f0'
+                      }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={personaColors[persona]} strokeWidth="1.8">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                        <path d="M14 2v6h6"/>
+                      </svg>
+                      <span>{ref.hd}</span>
+                      <span style={{ color: 'rgba(226,232,240,0.7)' }}>{ref.no}</span>
+                      {hoveredRef === i && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '-44px',
+                          left: '0',
+                          padding: '8px 10px',
+                          background: '#fff',
+                          color: '#0f172a',
+                          fontSize: '11px',
+                          borderRadius: '8px',
+                          boxShadow: '0 10px 30px rgba(0,0,0,0.18)',
+                          whiteSpace: 'nowrap',
+                          border: `1px solid ${personaColors[persona]}40`
+                        }}>
+                          {ref.info}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             
-            {/* Answer Card - larger */}
+            {/* Answer Card - redesigned */}
             <div style={{
               background: '#ffffff',
               borderRadius: '16px',
-              padding: '28px 32px',
+              padding: '24px 26px',
               boxShadow: '0 25px 80px rgba(0, 0, 0, 0.12), 0 10px 30px rgba(0, 0, 0, 0.08)',
               opacity: showAnswer ? 1 : 0,
               transform: showAnswer ? 'translateY(0)' : 'translateY(20px)',
@@ -990,7 +1014,7 @@ const LandingPage = ({ onNavigate, isLoaded }) => {
                         flex: 1,
                         height: '6px',
                         borderRadius: '6px',
-                        background: idx <= progressStep ? 'linear-gradient(90deg, #6385b5, #8b7cc9)' : 'rgba(0,0,0,0.08)',
+                        background: idx <= progressStep ? `linear-gradient(90deg, ${personaColors[persona]}, #0ea5e9)` : 'rgba(0,0,0,0.08)',
                         transition: 'background 0.3s ease'
                       }} />
                     ))}
@@ -1018,7 +1042,7 @@ const LandingPage = ({ onNavigate, isLoaded }) => {
                   <div style={{
                     width: '20px',
                     height: '20px',
-                    background: 'linear-gradient(135deg, #6385b5 0%, #8b7cc9 100%)',
+                    background: `linear-gradient(135deg, ${personaColors[persona]} 0%, #0ea5e9 100%)`,
                     borderRadius: '6px',
                     display: 'flex',
                     alignItems: 'center',
@@ -1032,8 +1056,8 @@ const LandingPage = ({ onNavigate, isLoaded }) => {
                   </div>
                   <span style={{
                     fontSize: '11px',
-                    color: 'rgba(99, 133, 181, 0.9)',
-                    fontWeight: '700',
+                    color: '#0f172a',
+                    fontWeight: '800',
                     letterSpacing: '0.8px',
                     textTransform: 'uppercase'
                   }}>AI Özeti</span>
@@ -1041,19 +1065,20 @@ const LandingPage = ({ onNavigate, isLoaded }) => {
                     onClick={handleCopySummary}
                     style={{
                       marginLeft: 'auto',
-                      background: 'rgba(99,133,181,0.12)',
-                      border: '1px solid rgba(99,133,181,0.25)',
-                      color: '#2a2a2a',
+                      background: `${personaColors[persona]}15`,
+                      border: `1px solid ${personaColors[persona]}40`,
+                      color: '#0f172a',
                       fontSize: '11px',
                       padding: '6px 8px',
                       borderRadius: '8px',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '6px'
+                      gap: '6px',
+                      fontWeight: 700
                     }}
                   >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2a2a2a" strokeWidth="2">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0f172a" strokeWidth="2">
                       <rect x="9" y="9" width="11" height="13" rx="2" />
                       <path d="M5 15V5a2 2 0 012-2h10" />
                     </svg>
@@ -1062,79 +1087,85 @@ const LandingPage = ({ onNavigate, isLoaded }) => {
                 </div>
                 <p style={{
                   fontSize: '14px',
-                  color: '#2a2a2a',
+                  color: '#1f2937',
                   lineHeight: '1.75',
                   margin: 0,
-                  fontWeight: '400'
+                  fontWeight: '500'
                 }}>
-                  {active.summary}
+                  {active?.summary}
                 </p>
               </div>
               
               {/* Rule Cards - larger */}
-              <div style={{ marginBottom: '18px' }}>
-                <div style={{
-                  fontSize: '11px',
-                  color: 'rgba(0, 0, 0, 0.45)',
-                  marginBottom: '12px',
-                  fontWeight: '600',
-                  letterSpacing: '0.5px'
-                }}>İlgili Kural Kartları</div>
-                
-                {active.rules.map((card, i) => (
-                  <div key={i} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    padding: '14px 16px',
-                    background: 'rgba(0, 0, 0, 0.02)',
-                    marginBottom: '8px',
-                    borderRadius: '10px',
-                    transition: 'all 0.3s ease',
-                    cursor: 'pointer'
-                  }}>
-                    <div style={{
-                      width: '8px',
-                      height: '8px',
-                      background: card.color,
-                      borderRadius: '50%'
-                    }} />
-                    <span style={{ fontSize: '13px', color: '#2a2a2a', fontWeight: '500' }}>{card.title}</span>
-                    <span style={{ 
-                      marginLeft: 'auto', 
-                      fontSize: '11px', 
-                      color: 'rgba(0, 0, 0, 0.4)',
-                      fontFamily: "'JetBrains Mono', monospace",
-                      fontWeight: '500'
-                    }}>
-                      {card.count} karar
-                    </span>
-                  </div>
-                ))}
-              </div>
-              
-              {/* Source Citations */}
-              <div style={{
-                display: 'flex',
-                gap: '8px',
-                flexWrap: 'wrap'
-              }}>
-                {active.citations.map((cite, i) => (
-                  <span key={i} className="source-chip" style={{
+              {active && (
+                <div style={{ marginBottom: '18px' }}>
+                  <div style={{
                     fontSize: '11px',
                     color: 'rgba(0, 0, 0, 0.45)',
-                    padding: '6px 10px',
-                    background: 'rgba(0, 0, 0, 0.04)',
-                    borderRadius: '6px',
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontWeight: '500',
-                    border: i === activeDemo ? '1px solid rgba(99,133,181,0.35)' : '1px solid rgba(0,0,0,0.05)',
-                    boxShadow: i === activeDemo ? '0 8px 20px rgba(99,133,181,0.25)' : 'none'
-                  }}>
-                    {cite}
-                  </span>
-                ))}
-              </div>
+                    marginBottom: '12px',
+                    fontWeight: '700',
+                    letterSpacing: '0.5px'
+                  }}>İlgili Kural Kartları</div>
+                  
+                  {active.rules.map((card, i) => (
+                    <div key={i} style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '14px 16px',
+                      background: `${card.color}08`,
+                      marginBottom: '8px',
+                      borderRadius: '12px',
+                      border: `1px solid ${card.color}30`,
+                      transition: 'all 0.3s ease',
+                      cursor: 'pointer'
+                    }}>
+                      <div style={{
+                        width: '9px',
+                        height: '9px',
+                        background: card.color,
+                        borderRadius: '50%',
+                        boxShadow: `0 0 0 6px ${card.color}15`
+                      }} />
+                      <span style={{ fontSize: '13px', color: '#111827', fontWeight: '600' }}>{card.title}</span>
+                      <span style={{ 
+                        marginLeft: 'auto', 
+                        fontSize: '11px', 
+                        color: 'rgba(0, 0, 0, 0.55)',
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontWeight: '600'
+                      }}>
+                        {card.count} karar
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {/* Source Citations */}
+              {active && (
+                <div style={{
+                  display: 'flex',
+                  gap: '8px',
+                  flexWrap: 'wrap'
+                }}>
+                  {active.citations.map((cite, i) => (
+                    <span key={i} className="source-chip" style={{
+                      fontSize: '11px',
+                      color: '#0f172a',
+                      padding: '7px 10px',
+                      background: 'rgba(15, 23, 42, 0.04)',
+                      borderRadius: '8px',
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontWeight: '600',
+                      border: i === activeDemo ? `1px solid ${personaColors[persona]}50` : '1px solid rgba(0,0,0,0.06)',
+                      boxShadow: i === activeDemo ? `0 8px 18px ${personaColors[persona]}25` : 'none'
+                    }}>
+                      {cite}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           
